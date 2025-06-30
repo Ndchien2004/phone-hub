@@ -1,9 +1,11 @@
+
 package model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Entity
@@ -62,5 +64,22 @@ public class Order {
     @PrePersist
     protected void onCreate() {
         orderDate = LocalDateTime.now();
+    }
+
+    // Helper methods for JSP
+    public String getFormattedOrderDate() {
+        if (orderDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            return orderDate.format(formatter);
+        }
+        return "";
+    }
+
+    public String getFormattedOrderDateShort() {
+        if (orderDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            return orderDate.format(formatter);
+        }
+        return "";
     }
 }

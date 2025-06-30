@@ -24,11 +24,15 @@ public class OrderItem {
     private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "price", nullable = false)
     private Long price;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
+    // Temporary fields for display purposes (not persisted)
+    @Transient
+    private String productName;
+
+    @Transient
+    private String productImageUrl;
 }
