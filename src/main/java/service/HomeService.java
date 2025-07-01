@@ -1,4 +1,4 @@
-package model.service;
+package service;
 
 public interface HomeService {
 }
