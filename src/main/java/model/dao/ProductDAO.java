@@ -1,5 +1,6 @@
 package model.dao;
 import model.entity.Product;
+
 import java.util.List;
 import java.util.Optional;
 

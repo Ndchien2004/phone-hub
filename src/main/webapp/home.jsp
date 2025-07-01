@@ -3,75 +3,72 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Commerce Store</title>
-    <!-- Bootstrap 5.3.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <title>Phone Store - Trang chủ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-        .sidebar {
-            background-color: #f8f9fa;
-            min-height: calc(100vh - 56px);
-            padding: 20px 0;
-        }
-        .product-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            transition: transform 0.2s;
-        }
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
         .product-image {
             height: 200px;
             background-color: #f8f9fa;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid #dee2e6;
+            border: 1px dashed #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
         }
-        .price {
-            color: red;
+        .price-original {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .price-sale {
+            color: #dc3545;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.1em;
         }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+        .sidebar {
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            min-height: calc(100vh - 56px);
         }
-        .form-check-input:checked {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .sidebar-section {
-            margin-bottom: 25px;
-        }
-        .sidebar-section h6 {
-            font-weight: bold;
-            margin-bottom: 15px;
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
-<!-- Navigation Bar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+<!-- Header Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Logo</a>
-        <div class="ms-auto">
-            <button class="btn btn-outline-light me-2">
-                <i class="bi bi-cart"></i>
-                <span class="badge bg-danger">3</span>
-            </button>
-            <button class="btn btn-primary">Register</button>
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold" href="#">PhoneStore</a>
+
+        <!-- Right side items -->
+        <div class="d-flex align-items-center">
+            <!-- Cart Icon -->
+            <div class="position-relative me-3">
+                <i class="fas fa-shopping-cart fa-lg text-primary"></i>
+                <span class="cart-badge" id="cartCount">3</span>
+            </div>
+
+            <!-- Register Button -->
+            <button class="btn btn-outline-primary">Đăng ký</button>
         </div>
     </div>
 </nav>
@@ -79,141 +76,210 @@
 <div class="container">
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 sidebar">
-            <!-- Search Section -->
-            <div class="sidebar-section">
-                <h6>Search Products</h6>
-                <form action="<%-- TODO: Add servlet URL for search --%>" method="GET">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Search by product name..." name="search" value="${param.search}">
-                        <button class="btn btn-primary" type="submit">Search</button>
-                    </div>
-                </form>
+<%--        <form action="search" method="get">--%>
+        <div class="col-md-3 col-lg-2 sidebar p-3">
+            <h5 class="mb-3">Tìm kiếm</h5>
+
+            <!-- Search Name -->
+            <div class="mb-3">
+                <label for="searchName" class="form-label">Tên sản phẩm</label>
+                <input type="text" class="form-control" id="searchName" name="keyword" placeholder="Nhập tên điện thoại..." value="${keyword != null ? keyword : ''}">
             </div>
 
-            <!-- Categories Section -->
-            <div class="sidebar-section">
-                <h6>Categories</h6>
-                <form action="<%-- TODO: Add servlet URL for category filter --%>" method="GET">
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="electronics" id="electronics" name="category">
-                        <label class="form-check-label" for="electronics">Electronics</label>
+            <!-- Category Search -->
+            <div class="mb-3">
+                <label class="form-label">Danh mục</label>
+                <c:forEach var="category" items="${categories}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${category.name}" id="${category.settingId}">
+                        <label class="form-check-label" for="${category.name}">${category.name}</label>
                     </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="clothing" id="clothing" name="category">
-                        <label class="form-check-label" for="clothing">Clothing</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="books" id="books" name="category">
-                        <label class="form-check-label" for="books">Books</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="home-garden" id="home-garden" name="category">
-                        <label class="form-check-label" for="home-garden">Home & Garden</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" value="sports" id="sports" name="category">
-                        <label class="form-check-label" for="sports">Sports</label>
-                    </div>
-                </form>
+                </c:forEach>
             </div>
 
-            <!-- Price Range Section -->
-            <div class="sidebar-section">
-                <h6>Price Range</h6>
-                <form action="<%-- TODO: Add servlet URL for price filter --%>" method="GET">
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="priceRange" id="under25" value="0-25">
-                        <label class="form-check-label" for="under25">Under $25</label>
+            <!-- Price Range -->
+            <div class="mb-3">
+                <label class="form-label">Giá</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="number" class="form-control form-control-sm" placeholder="Từ" id="priceFrom">
                     </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="priceRange" id="25-50" value="25-50">
-                        <label class="form-check-label" for="25-50">$25 - $50</label>
+                    <div class="col-6">
+                        <input type="number" class="form-control form-control-sm" placeholder="Đến" id="priceTo">
                     </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="priceRange" id="50-100" value="50-100">
-                        <label class="form-check-label" for="50-100">$50 - $100</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="priceRange" id="over100" value="100+">
-                        <label class="form-check-label" for="over100">$100+</label>
-                    </div>
-                </form>
+                </div>
             </div>
 
-            <!-- Sort By Section -->
-            <div class="sidebar-section">
-                <h6>Sort By</h6>
-                <form action="<%-- TODO: Add servlet URL for sorting --%>" method="GET">
-                    <select class="form-select mb-3" name="sortBy">
-                        <option value="price-low-high" ${param.sortBy == 'price-low-high' ? 'selected' : ''}>Price: Low to High</option>
-                        <option value="price-high-low" ${param.sortBy == 'price-high-low' ? 'selected' : ''}>Price: High to Low</option>
-                        <option value="name-a-z" ${param.sortBy == 'name-a-z' ? 'selected' : ''}>Name: A to Z</option>
-                        <option value="name-z-a" ${param.sortBy == 'name-z-a' ? 'selected' : ''}>Name: Z to A</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary btn-sm">Apply Sort</button>
-                </form>
+            <!-- Sort Options -->
+            <div class="mb-3">
+                <label for="sortBy" class="form-label">Sắp xếp theo</label>
+                <select class="form-select" id="sortBy">
+                    <option value="">Chọn sắp xếp</option>
+                    <option value="name-asc">Tên A-Z</option>
+                    <option value="name-desc">Tên Z-A</option>
+                    <option value="price-asc">Giá thấp đến cao</option>
+                    <option value="price-desc">Giá cao đến thấp</option>
+                </select>
             </div>
+
+            <!-- Search Button -->
+            <button class="btn btn-primary w-100" type="submit">
+                <i class="fas fa-search me-2"></i>Tìm kiếm
+            </button>
         </div>
-
+<%--        </form>--%>
         <!-- Main Content -->
-        <div class="col-md-9 col-lg-10">
-            <div class="container-fluid py-4">
-                <!-- Products Grid -->
-                <div class="row">
+        <div class="col-md-9 col-lg-10 p-4">
+            <h2 class="mb-4">Điện thoại nổi bật</h2>
 
-                    <c:forEach var="product" items="${page.content}" varStatus="status">
-                        <div class="col-md-4 col-lg-3 mb-4">
-                            <div class="card product-card h-100">
-                                <div class="product-image">
-                                    <c:choose>
-                                        <c:when test="${product != null and not empty product.imageUrl}">
-                                            <img src="${product.imageUrl}" alt="${product.name}" class="img-fluid" style="max-height: 180px;">
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="text-muted">Product's Image</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <div class="card-body d-flex flex-column">
-                                    <h6 class="card-title">${product.name}</h6>
-                                    <p class="price mt-auto mb-2">
-                                        <fmt:formatNumber value="${product.price}" type="number" groupingUsed="true" maxFractionDigits="2" minFractionDigits="0" /> VNĐ
-                                    </p>
-                                    <form action="<%-- TODO: Add servlet URL for add to cart --%>" method="POST">
-                                        <input type="hidden" name="productId" value="${product.id}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="btn btn-primary btn-sm w-100">Add to Cart</button>
-                                    </form>
-                                </div>
+            <!-- Products Grid -->
+            <div class="row g-4" id="productsContainer">
+
+                <!--Test truc tiep du lieu lay duoc-->
+                <%--<p>Hiện có: ${fn:length(pageResult.content)} sản phẩm</p>
+                <c:forEach var="product" items="${pageResult.content}">
+                    ${product}<br>
+                </c:forEach>--%>
+                <%--<c:forEach var="category" items="${categories}">
+                    ${category.name}
+                </c:forEach>--%>
+
+                <!-- Product Card -->
+                <c:forEach var="product" items="${pageResult.content}">
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="product-image">
+                            <img src="${product.imageUrl}.jpg" alt="Ảnh sản phẩm" class="img-fluid" style="max-height: 100%;">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">${product.name} || ${product.briefInfo}</h6>
+                            <div class="mb-2">
+                                <span class="price-original"><fmt:formatNumber value="${product.priceOrigin}" type="number" groupingUsed="true" maxFractionDigits="2" minFractionDigits="0" /> VNĐ</span>
+                                <div class="price-sale"><fmt:formatNumber value="${product.priceSale}" type="number" groupingUsed="true" maxFractionDigits="2" minFractionDigits="0" /> VNĐ</div>
+                            </div>
+                            <div class="mt-auto">
+                                <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="addToCart(1)">
+                                    <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
+                                </button>
+                                <button class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-bolt me-1"></i>Mua ngay
+                                </button>
                             </div>
                         </div>
-                    </c:forEach>
+                    </div>
                 </div>
+                </c:forEach>
+            </div>
                 <!-- Pagination -->
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item ${page.currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="?page=${page.currentPage - 1}" tabindex="-1">← Prev</a>
+            <c:if test="${pageResult.totalPages > 1}">
+                <nav>
+                    <ul class="pagination justify-content-center mt-4">
+
+                        <!-- Previous -->
+                        <c:choose>
+                        <c:when test="${pageResult.currentPage == 1}">
+                        <li class="page-item disabled">
+                            </c:when>
+                            <c:otherwise>
+                        <li class="page-item">
+                            </c:otherwise>
+                            </c:choose>
+                            <a class="page-link" href="?page=${pageResult.currentPage - 1}">&laquo;</a>
                         </li>
 
-                        <c:forEach begin="1" end="${page.totalPages}" var="p">
-                            <li class="page-item ${p == page.currentPage ? 'active' : ''}">
-                                <a class="page-link" href="?page=${p}">${p}</a>
+                        <!-- Pages -->
+                        <c:forEach var="i" begin="1" end="${pageResult.totalPages}">
+                            <li class="page-item ${pageResult.currentPage == i ? 'active' : ''}">
+                                <a class="page-link" href="?page=${i}">${i}</a>
                             </li>
                         </c:forEach>
 
-                        <li class="page-item ${page.currentPage == page.totalPages ? 'disabled' : ''}">
-                            <a class="page-link" href="?page=${page.currentPage + 1}">Next →</a>
+                        <!-- Next -->
+                        <c:choose>
+                        <c:when test="${pageResult.currentPage == pageResult.totalPages}">
+                        <li class="page-item disabled">
+                            </c:when>
+                            <c:otherwise>
+                        <li class="page-item">
+                            </c:otherwise>
+                            </c:choose>
+                            <a class="page-link" href="?page=${pageResult.currentPage + 1}">&raquo;</a>
                         </li>
+
                     </ul>
                 </nav>
-            </div>
+            </c:if>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap 5.3.3 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let cartCount = 3;
+
+    function addToCart(productId) {
+        cartCount++;
+        document.getElementById('cartCount').textContent = cartCount;
+
+        // Show toast notification
+        showToast('Đã thêm sản phẩm vào giỏ hàng!');
+    }
+
+    function showToast(message) {
+        // Create toast element
+        const toastHtml = `
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toastContainer';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '9999';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Add toast to container
+        toastContainer.innerHTML = toastHtml;
+
+        // Initialize and show toast
+        const toastElement = toastContainer.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+
+    function searchProducts() {
+        const searchName = document.getElementById('searchName').value;
+        const categories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        const priceFrom = document.getElementById('priceFrom').value;
+        const priceTo = document.getElementById('priceTo').value;
+        const sortBy = document.getElementById('sortBy').value;
+
+        console.log('Searching with:', {
+            name: searchName,
+            categories: categories,
+            priceRange: { from: priceFrom, to: priceTo },
+            sort: sortBy
+        });
+
+        showToast('Tìm kiếm đã được thực hiện!');
+    }
+
+    // Add event listener for Enter key on search input
+    document.getElementById('searchName').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchProducts();
+        }
+    });
+</script>
 </body>
 </html>

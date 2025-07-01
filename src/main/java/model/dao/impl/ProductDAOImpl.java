@@ -3,8 +3,8 @@ package model.dao.impl;
 import model.dao.DBContext;
 import model.dao.ProductDAO;
 import model.entity.Product;
+
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +79,7 @@ public class ProductDAOImpl implements ProductDAO {
         }
         return products;
     }
-    
+
     @Override
     public int getTotalProducts() {
         String sql = "SELECT COUNT(*) FROM products WHERE is_deleted = 0";
@@ -94,7 +94,7 @@ public class ProductDAOImpl implements ProductDAO {
         }
         return 0;
     }
-    
+
     @Override
     public List<Product> findWithPagination(int offset, int limit) {
         String sql = "SELECT product_id, category_id, product_name, image, brief_info, description, color, memory, quantity, price_sale, price_origin, created_at, updated_at, is_deleted FROM products WHERE is_deleted = 0 ORDER BY created_at DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -113,7 +113,7 @@ public class ProductDAOImpl implements ProductDAO {
         }
         return products;
     }
-    
+
     @Override
     public boolean save(Product product) {
         String sql = "INSERT INTO products (category_id, product_name, image, brief_info, description, color, memory, quantity, price_sale, price_origin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -129,14 +129,14 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setInt(8, product.getQuantity());
             ps.setLong(9, product.getPriceSale());
             ps.setLong(10, product.getPriceOrigin());
-            
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-    
+
     @Override
     public boolean update(Product product) {
         String sql = "UPDATE products SET category_id = ?, product_name = ?, image = ?, brief_info = ?, description = ?, color = ?, memory = ?, quantity = ?, price_sale = ?, price_origin = ?, updated_at = GETDATE() WHERE product_id = ?";
@@ -153,14 +153,14 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setLong(9, product.getPriceSale());
             ps.setLong(10, product.getPriceOrigin());
             ps.setInt(11, product.getProductId());
-            
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
-    
+
     @Override
     public boolean delete(int id) {
         String sql = "UPDATE products SET is_deleted = 1 WHERE product_id = ?";
@@ -173,14 +173,14 @@ public class ProductDAOImpl implements ProductDAO {
             return false;
         }
     }
-    
+
     @Override
     public boolean existsByNameColorMemory(String name, String color, String memory, Integer excludeId) {
         String sql = "SELECT COUNT(*) FROM products WHERE product_name = ? AND color = ? AND memory = ? AND is_deleted = 0";
         if (excludeId != null) {
             sql += " AND product_id != ?";
         }
-        
+
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
@@ -189,7 +189,7 @@ public class ProductDAOImpl implements ProductDAO {
             if (excludeId != null) {
                 ps.setInt(4, excludeId);
             }
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -200,7 +200,7 @@ public class ProductDAOImpl implements ProductDAO {
         }
         return false;
     }
-    
+
     private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
         Product product = new Product();
         product.setProductId(rs.getInt("product_id"));
@@ -214,17 +214,17 @@ public class ProductDAOImpl implements ProductDAO {
         product.setQuantity(rs.getInt("quantity"));
         product.setPriceSale(rs.getLong("price_sale"));
         product.setPriceOrigin(rs.getLong("price_origin"));
-        
+
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
             product.setCreatedAt(createdAt.toLocalDateTime());
         }
-        
+
         Timestamp updatedAt = rs.getTimestamp("updated_at");
         if (updatedAt != null) {
             product.setUpdatedAt(updatedAt.toLocalDateTime());
         }
-        
+
         product.setDeleted(rs.getBoolean("is_deleted"));
         return product;
     }

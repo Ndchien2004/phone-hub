@@ -33,4 +33,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-/src/main/java/model/dao/DBContext.java
+src/main/java/model/dao/DBContext.java
