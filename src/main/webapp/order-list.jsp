@@ -1,12 +1,14 @@
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách đơn hàng - CellphoneS</title>
+    <title>Đơn hàng của tôi - CellphoneS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -19,6 +21,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
             color: #333;
+            line-height: 1.6;
         }
 
         .container {
@@ -27,38 +30,45 @@
             padding: 0 20px;
         }
 
-        .page-title {
+        .page-header {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 25px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .page-title h1 {
+        .page-header h1 {
             color: #d70018;
             font-size: 28px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .stats-section {
-            background: white;
+        .page-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .orders-summary {
+            background: linear-gradient(135deg, #d70018, #ff6b35);
+            color: white;
             padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
         }
 
-        .stats-info {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #d70018;
-        }
-
-        .stats-info h3 {
-            color: #d70018;
+        .orders-summary h3 {
+            font-size: 32px;
             margin-bottom: 5px;
+        }
+
+        .orders-summary p {
+            opacity: 0.9;
+            font-size: 16px;
         }
 
         .order-list {
@@ -69,192 +79,222 @@
 
         .order-card {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #d70018;
         }
 
         .order-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .order-header {
             background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
+            border-bottom: 1px solid #eee;
         }
 
-        .order-info {
+        .order-basic-info {
             display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .order-id {
             font-weight: bold;
             color: #d70018;
-            font-size: 16px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .order-date {
             color: #666;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .order-status-amount {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
         }
 
         .order-status {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Trạng thái màu sắc */
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-processing {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-shipped {
+            background: #cce4f7;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+
+        .status-delivered {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1b0b7;
+        }
+
+        .status-default {
             background: #e7f3ff;
             color: #0066cc;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
+            border: 1px solid #b3d7ff;
         }
 
         .order-total {
             font-weight: bold;
             color: #d70018;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .order-body {
             padding: 20px;
         }
 
-        .products-section {
-            margin-bottom: 15px;
+        .products-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .products-section h4 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 16px;
+        .product-preview {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .product-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .product-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px;
+            gap: 12px;
             background: #f8f9fa;
+            padding: 12px;
             border-radius: 8px;
-            border: 1px solid #eee;
+            flex: 1;
+            min-width: 250px;
         }
 
         .product-image {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 8px;
             object-fit: cover;
             border: 1px solid #ddd;
-            background: #fff;
+            background: white;
         }
 
-        .product-details {
+        .product-info {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
         }
 
         .product-name {
             font-weight: 500;
             color: #333;
-            font-size: 16px;
-            line-height: 1.4;
+            font-size: 14px;
+            line-height: 1.3;
+            margin-bottom: 4px;
         }
 
         .product-quantity {
             color: #666;
-            font-size: 14px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .product-price {
-            font-weight: bold;
-            color: #d70018;
-            font-size: 16px;
+        .more-products {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9ecef;
+            color: #666;
+            padding: 12px;
+            border-radius: 8px;
+            min-width: 120px;
+            font-size: 13px;
+            text-align: center;
         }
 
         .order-summary {
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            margin-top: 15px;
-        }
-
-        .summary-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
         }
 
-        .summary-label {
+        .summary-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
             color: #666;
         }
 
         .summary-value {
-            font-weight: 500;
+            font-weight: 600;
             color: #333;
-        }
-
-        .total-row {
-            border-top: 1px solid #eee;
-            padding-top: 8px;
-            margin-top: 8px;
-            font-size: 16px;
-        }
-
-        .total-row .summary-label {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .total-row .summary-value {
-            color: #d70018;
-            font-weight: bold;
-            font-size: 18px;
         }
 
         .order-actions {
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #eee;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
             gap: 10px;
         }
 
-        .order-meta {
-            color: #666;
-            font-size: 14px;
-        }
-
         .btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             transition: all 0.3s ease;
         }
 
@@ -265,6 +305,7 @@
 
         .btn-primary:hover {
             background: #b50015;
+            transform: translateY(-1px);
         }
 
         .btn-outline {
@@ -276,14 +317,15 @@
         .btn-outline:hover {
             background: #d70018;
             color: white;
+            transform: translateY(-1px);
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .empty-state i {
@@ -294,37 +336,88 @@
 
         .empty-state h3 {
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 24px;
         }
 
         .empty-state p {
             color: #999;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        /* Status tracking */
+        .status-tracking {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .status-dot.active {
+            background: #28a745;
+        }
+
+        .status-dot.processing {
+            background: #ffc107;
+        }
+
+        .status-dot.shipped {
+            background: #17a2b8;
+        }
+
+        .status-dot.cancelled {
+            background: #dc3545;
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
             .order-header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 15px;
             }
 
-            .order-info {
+            .order-status-amount {
+                align-items: flex-start;
                 width: 100%;
+                flex-direction: row;
                 justify-content: space-between;
             }
 
-            .product-item {
+            .products-summary {
                 flex-direction: column;
-                text-align: center;
             }
 
-            .product-image {
-                align-self: center;
+            .product-preview {
+                min-width: auto;
+            }
+
+            .order-summary {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .summary-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
 
             .order-actions {
-                flex-direction: column;
-                align-items: stretch;
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -332,18 +425,19 @@
 <body>
 
 <div class="container">
-    <!-- Page Title -->
-    <div class="page-title">
-        <h1><i class="fas fa-shopping-bag"></i> Danh sách đơn hàng</h1>
-        <p>Quản lý và theo dõi tất cả các đơn hàng trong hệ thống</p>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-shopping-bag"></i>
+            Đơn hàng của tôi
+        </h1>
+        <p>Theo dõi và quản lý các đơn hàng bạn đã đặt</p>
     </div>
 
-    <!-- Stats Section -->
-    <div class="stats-section">
-        <div class="stats-info">
-            <h3><i class="fas fa-chart-bar"></i> Thống kê</h3>
-            <p>Tổng số đơn hàng: <strong>${totalOrders}</strong></p>
-        </div>
+    <!-- Orders Summary -->
+    <div class="orders-summary">
+        <h3>${totalOrders}</h3>
+        <p><i class="fas fa-receipt"></i> Tổng số đơn hàng đã đặt</p>
     </div>
 
     <!-- Order List -->
@@ -353,9 +447,9 @@
                 <div class="empty-state">
                     <i class="fas fa-shopping-bag"></i>
                     <h3>Chưa có đơn hàng nào</h3>
-                    <p>Chưa có đơn hàng nào trong hệ thống.</p>
-                    <a href="/products" class="btn btn-primary">
-                        <i class="fas fa-shopping-cart"></i> Xem sản phẩm
+                    <p>Bạn chưa có đơn hàng nào. Hãy khám phá và mua sắm những sản phẩm yêu thích!</p>
+                    <a href="${pageContext.request.contextPath}/products" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart"></i> Mua sắm ngay
                     </a>
                 </div>
             </c:when>
@@ -364,118 +458,124 @@
                     <div class="order-card">
                         <!-- Order Header -->
                         <div class="order-header">
-                            <div class="order-info">
-                                <span class="order-id">
+                            <div class="order-basic-info">
+                                <div class="order-id">
                                     <i class="fas fa-receipt"></i>
                                     Đơn hàng #${order.orderId}
-                                </span>
-                                <span class="order-date">
-                                    <i class="fas fa-calendar"></i>
-                                    ${order.formattedOrderDate}
-                                </span>
-                                <span class="order-status">
-                                    <i class="fas fa-info-circle"></i>
-                                    Đã đặt hàng
-                                </span>
+                                </div>
+                                <div class="order-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Đặt ngày ${order.formattedOrderDateShort}
+                                </div>
                             </div>
-                            <div class="order-total">
-                                <fmt:formatNumber value="${order.totalMoney}" type="currency"
-                                                  currencySymbol="₫" maxFractionDigits="0" />
+                            <div class="order-status-amount">
+                                <c:choose>
+                                    <c:when test="${not empty order.status and not empty order.status.description}">
+                                        <c:set var="statusClass" value="status-default" />
+                                        <c:choose>
+                                            <c:when test="${fn:containsIgnoreCase(order.status.name, 'pending') or fn:containsIgnoreCase(order.status.description, 'chờ')}">
+                                                <c:set var="statusClass" value="status-pending" />
+                                            </c:when>
+                                            <c:when test="${fn:containsIgnoreCase(order.status.name, 'processing') or fn:containsIgnoreCase(order.status.description, 'xử lý')}">
+                                                <c:set var="statusClass" value="status-processing" />
+                                            </c:when>
+                                            <c:when test="${fn:containsIgnoreCase(order.status.name, 'shipped') or fn:containsIgnoreCase(order.status.description, 'giao')}">
+                                                <c:set var="statusClass" value="status-shipped" />
+                                            </c:when>
+                                            <c:when test="${fn:containsIgnoreCase(order.status.name, 'delivered') or fn:containsIgnoreCase(order.status.description, 'hoàn thành')}">
+                                                <c:set var="statusClass" value="status-delivered" />
+                                            </c:when>
+                                            <c:when test="${fn:containsIgnoreCase(order.status.name, 'cancelled') or fn:containsIgnoreCase(order.status.description, 'hủy')}">
+                                                <c:set var="statusClass" value="status-cancelled" />
+                                            </c:when>
+                                        </c:choose>
+                                        <div class="order-status ${statusClass}">
+                                            <i class="fas fa-info-circle"></i>
+                                                ${order.status.description}
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="order-status status-default">
+                                            <i class="fas fa-info-circle"></i>
+                                            Chưa xác định
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                <div class="order-total">
+                                    <fmt:formatNumber value="${order.totalMoney}" type="currency"
+                                                      currencySymbol="₫" maxFractionDigits="0" />
+                                </div>
                             </div>
                         </div>
 
                         <!-- Order Body -->
                         <div class="order-body">
-                            <!-- Products Section -->
-                            <div class="products-section">
-                                <h4><i class="fas fa-box"></i> Sản phẩm trong đơn hàng</h4>
-                                <div class="product-list">
-                                    <c:choose>
-                                        <c:when test="${not empty order.orderItems}">
-                                            <c:forEach var="item" items="${order.orderItems}">
-                                                <div class="product-item">
-                                                    <img src="${not empty item.productImageUrl ? item.productImageUrl : 'https://via.placeholder.com/80x80?text=No+Image'}"
-                                                         alt="${item.productName}" class="product-image">
-                                                    <div class="product-details">
-                                                        <div class="product-name">${item.productName}</div>
-                                                        <div class="product-quantity">
-                                                            <i class="fas fa-cubes"></i> Số lượng: ${item.quantity}
-                                                        </div>
-                                                        <div class="product-price">
-                                                            <fmt:formatNumber value="${item.price}" type="currency"
-                                                                              currencySymbol="₫" maxFractionDigits="0" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </c:forEach>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="product-item">
-                                                <img src="https://via.placeholder.com/80x80?text=No+Image"
-                                                     alt="Sản phẩm" class="product-image">
-                                                <div class="product-details">
-                                                    <div class="product-name">Thông tin sản phẩm không có sẵn</div>
+                            <!-- Products Summary -->
+                            <div class="products-summary">
+                                <c:choose>
+                                    <c:when test="${not empty order.orderItems}">
+                                        <!-- Hiển thị tối đa 2 sản phẩm đầu -->
+                                        <c:forEach var="item" items="${order.orderItems}" end="1">
+                                            <div class="product-preview">
+                                                <img src="${not empty item.product.image ? item.product.image : 'https://via.placeholder.com/60x60?text=No+Image'}"
+                                                     alt="${item.product.productName}" class="product-image">
+                                                <div class="product-info">
+                                                    <div class="product-name">${item.product.productName}</div>
                                                     <div class="product-quantity">
-                                                        <i class="fas fa-cubes"></i> Số lượng: 1
-                                                    </div>
-                                                    <div class="product-price">
-                                                        <fmt:formatNumber value="${order.totalMoney}" type="currency"
-                                                                          currencySymbol="₫" maxFractionDigits="0" />
+                                                        <i class="fas fa-cubes"></i>
+                                                        Số lượng: ${item.quantity}
                                                     </div>
                                                 </div>
                                             </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
+                                        </c:forEach>
+                                        <!-- Hiển thị số sản phẩm còn lại nếu có -->
+                                        <c:if test="${fn:length(order.orderItems) > 2}">
+                                            <div class="more-products">
+                                                <i class="fas fa-plus-circle"></i>
+                                                <span>+${fn:length(order.orderItems) - 2} sản phẩm khác</span>
+                                            </div>
+                                        </c:if>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="product-preview">
+                                            <img src="https://via.placeholder.com/60x60?text=No+Image"
+                                                 alt="Sản phẩm" class="product-image">
+                                            <div class="product-info">
+                                                <div class="product-name">Thông tin sản phẩm không có sẵn</div>
+                                                <div class="product-quantity">
+                                                    <i class="fas fa-cubes"></i>
+                                                    Số lượng: 1
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
 
                             <!-- Order Summary -->
                             <div class="order-summary">
-                                <c:if test="${order.discount > 0}">
-                                    <c:set var="discountAmount" value="${order.totalMoney * order.discount / (100 - order.discount)}" />
-                                    <c:set var="subtotal" value="${order.totalMoney + discountAmount}" />
-
-                                    <div class="summary-row">
-                                        <span class="summary-label">Tạm tính:</span>
-                                        <span class="summary-value">
-                                            <fmt:formatNumber value="${subtotal}" type="currency"
-                                                              currencySymbol="₫" maxFractionDigits="0" />
-                                        </span>
+                                <div class="summary-info">
+                                    <div class="summary-item">
+                                        <i class="fas fa-box"></i>
+                                        <span class="summary-value">${fn:length(order.orderItems)}</span>
+                                        sản phẩm
                                     </div>
-                                    <div class="summary-row">
-                                        <span class="summary-label">Giảm giá (${order.discount}%):</span>
-                                        <span class="summary-value" style="color: #28a745;">
-                                            -<fmt:formatNumber value="${discountAmount}" type="currency"
-                                                               currencySymbol="₫" maxFractionDigits="0" />
-                                        </span>
+                                    <div class="summary-item">
+                                        <i class="fas fa-credit-card"></i>
+                                            ${not empty order.paymentMethod.description ? order.paymentMethod.description : 'Chưa xác định'}
                                     </div>
-                                </c:if>
-                                <div class="summary-row total-row">
-                                    <span class="summary-label">Tổng cộng:</span>
-                                    <span class="summary-value">
-                                        <fmt:formatNumber value="${order.totalMoney}" type="currency"
-                                                          currencySymbol="₫" maxFractionDigits="0" />
-                                    </span>
+                                    <c:if test="${order.discount > 0}">
+                                        <div class="summary-item">
+                                            <i class="fas fa-tag"></i>
+                                            Giảm <span class="summary-value" style="color: #28a745;">${order.discount}%</span>
+                                        </div>
+                                    </c:if>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Order Actions -->
-                        <div class="order-actions">
-                            <div class="order-meta">
-                                <i class="fas fa-clock"></i>
-                                <span>Đặt hàng: ${order.formattedOrderDateShort}</span>
-                                <c:if test="${not empty order.note}">
-                                    <span style="margin-left: 15px;">
-                                        <i class="fas fa-sticky-note"></i>
-                                        Ghi chú: ${order.note}
-                                    </span>
-                                </c:if>
-                            </div>
-                            <div class="action-buttons">
-                                <a href="${pageContext.request.contextPath}/orders/${order.orderId}" class="btn btn-outline">
-                                    <i class="fas fa-eye"></i> Xem chi tiết
-                                </a>
+                                <div class="order-actions">
+                                    <a href="${pageContext.request.contextPath}/orders/${order.orderId}" class="btn btn-outline">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -491,23 +591,49 @@
         const orderCards = document.querySelectorAll('.order-card');
         orderCards.forEach(card => {
             card.addEventListener('mouseenter', function() {
-                this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                this.style.transform = 'translateY(-4px)';
+                this.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.2)';
             });
 
             card.addEventListener('mouseleave', function() {
-                this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
             });
         });
 
-        // Add click handler for product items
-        const productItems = document.querySelectorAll('.product-item');
-        productItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Add any click behavior for products if needed
-                console.log('Product item clicked');
+        // Add click handler for product previews
+        const productPreviews = document.querySelectorAll('.product-preview');
+        productPreviews.forEach(preview => {
+            preview.addEventListener('mouseenter', function() {
+                this.style.background = '#f0f0f0';
+                this.style.transform = 'scale(1.02)';
+            });
+
+            preview.addEventListener('mouseleave', function() {
+                this.style.background = '#f8f9fa';
+                this.style.transform = 'scale(1)';
             });
         });
+
+        // Status tracking animation
+        const statusDots = document.querySelectorAll('.status-dot');
+        statusDots.forEach(dot => {
+            if (dot.classList.contains('active')) {
+                dot.style.animation = 'pulse 2s infinite';
+            }
+        });
     });
+
+    // CSS animation for status dots
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 </body>
 </html>
