@@ -15,24 +15,15 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
 
-        <!-- Quản lý phiên bản tập trung -->
-        <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
-        <jakarta.jstl.version>3.0.0</jakarta.jstl.version>
-        <glassfish.jstl.version>3.0.1</glassfish.jstl.version>
-        <hibernate.version>6.5.2.Final</hibernate.version>
-        <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
         <junit.version>5.11.0</junit.version>
-        <lombok.version>1.18.30</lombok.version>
-        <payos.version>1.0.3</payos.version>
         <cloudinary.version>2.3.0</cloudinary.version>
     </properties>
 
     <dependencies>
-        <!-- === Jakarta EE / Tomcat === -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>${jakarta.servlet.version}</version>
+            <version>6.1.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -46,41 +37,26 @@
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
-            <version>${jakarta.jstl.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-            <version>${glassfish.jstl.version}</version>
-        </dependency>
-
-
-        <!-- BẮT BUỘC: API cho các annotation @Entity, @Id, v.v. -->
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-
-        <!-- Thư viện JAXB, thường cần thiết cho Hibernate -->
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.5</version>
+            <version>3.0.1</version>
         </dependency>
 
         <!-- === Database Driver === -->
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>${mssql.driver.version}</version>
+            <version>12.8.1.jre11</version>
         </dependency>
 
         <!-- === Cổng Thanh Toán PayOS === -->
         <dependency>
             <groupId>vn.payos</groupId>
             <artifactId>payos-java</artifactId>
-            <version>${payos.version}</version>
+            <version>1.0.3</version>
         </dependency>
 
         <dependency>
@@ -100,7 +76,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
 

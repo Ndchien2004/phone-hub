@@ -1,69 +1,56 @@
 package model.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "products", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"product_name", "color", "memory"})
-})
-@Getter
-@Setter
 public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
     private Integer productId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Setting category;
-
-    @Column(name = "product_name", nullable = false, length = 200)
+    private Integer categoryId;
     private String productName;
-
-    @Column(name = "image", columnDefinition = "NVARCHAR(MAX)")
-    private String image;
-
-    @Column(name = "brief_info", columnDefinition = "NVARCHAR(MAX)")
+    private String imageUrl;
     private String briefInfo;
-
-    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
-
-    @Column(name = "color", nullable = false, length = 50)
     private String color;
-
-    @Column(name = "memory", nullable = false, length = 50)
     private String memory;
-
-    @Column(name = "quantity", nullable = false)
     private int quantity;
-
-    @Column(name = "price_sale", nullable = false)
     private Long priceSale;
-
-    @Column(name = "price_origin", nullable = false)
     private Long priceOrigin;
-
-    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private boolean isDeleted;
     private List<ProductImage> productImages;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    // --- GETTERS ---
+    public Integer getProductId() { return productId; }
+    public Integer getCategoryId() { return categoryId; }
+    public String getProductName() { return productName; } // JSP cần cái này
+    public String getImageUrl() { return imageUrl; } // JSP cần cái này
+    public String getBriefInfo() { return briefInfo; }
+    public String getDescription() { return description; }
+    public String getColor() { return color; }
+    public String getMemory() { return memory; }
+    public int getQuantity() { return quantity; }
+    public Long getPriceSale() { return priceSale; }
+    public Long getPriceOrigin() { return priceOrigin; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public boolean isDeleted() { return isDeleted; }
+    public List<ProductImage> getProductImages() { return productImages; }
+
+    // --- SETTERS ---
+    public void setProductId(Integer productId) { this.productId = productId; }
+    public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
+    public void setProductName(String productName) { this.productName = productName; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setBriefInfo(String briefInfo) { this.briefInfo = briefInfo; }
+    public void setDescription(String description) { this.description = description; }
+    public void setColor(String color) { this.color = color; }
+    public void setMemory(String memory) { this.memory = memory; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setPriceSale(Long priceSale) { this.priceSale = priceSale; }
+    public void setPriceOrigin(Long priceOrigin) { this.priceOrigin = priceOrigin; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
+    public void setProductImages(List<ProductImage> productImages) { this.productImages = productImages; }
 }
