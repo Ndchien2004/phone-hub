@@ -22,6 +22,9 @@ import java.util.List;
 @MultipartConfig
 public class ManagerProductServlet extends HttpServlet {
     private static final String PRODUCT_NOT_FOUND = "Product not found";
+    private static final String PAGE_TITLE_ATTR = "pageTitle";
+    private static final String CONTENT_PAGE_ATTR = "contentPage";
+    private static final String LAYOUT_PATH = "/views/manager/enhanced-layout.jsp";
     private final ProductService productService = new ProductServiceImpl();
     
     @Override
@@ -109,14 +112,21 @@ public class ManagerProductServlet extends HttpServlet {
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalProducts", totalProducts);
         
-        request.getRequestDispatcher("/views/manager/products/list.jsp").forward(request, response);
+        // Set layout attributes
+        request.setAttribute(PAGE_TITLE_ATTR, "Product Management");
+        request.setAttribute(CONTENT_PAGE_ATTR, "/views/manager/products/list.jsp");
+        request.getRequestDispatcher(LAYOUT_PATH).forward(request, response);
     }
     
     private void showAddProductForm(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         List<Setting> categories = productService.getCategories();
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/views/manager/products/add.jsp").forward(request, response);
+        
+        // Set layout attributes
+        request.setAttribute(PAGE_TITLE_ATTR, "Add Product");
+        request.setAttribute(CONTENT_PAGE_ATTR, "/views/manager/products/add.jsp");
+        request.getRequestDispatcher(LAYOUT_PATH).forward(request, response);
     }
     
     private void showEditProductForm(HttpServletRequest request, HttpServletResponse response) 
@@ -132,7 +142,11 @@ public class ManagerProductServlet extends HttpServlet {
         List<Setting> categories = productService.getCategories();
         request.setAttribute("product", product);
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/views/manager/products/edit.jsp").forward(request, response);
+        
+        // Set layout attributes
+        request.setAttribute(PAGE_TITLE_ATTR, "Edit Product");
+        request.setAttribute(CONTENT_PAGE_ATTR, "/views/manager/products/edit.jsp");
+        request.getRequestDispatcher(LAYOUT_PATH).forward(request, response);
     }
     
     private void viewProduct(HttpServletRequest request, HttpServletResponse response) 
@@ -146,7 +160,11 @@ public class ManagerProductServlet extends HttpServlet {
         }
         
         request.setAttribute("product", product);
-        request.getRequestDispatcher("/views/manager/products/view.jsp").forward(request, response);
+        
+        // Set layout attributes
+        request.setAttribute(PAGE_TITLE_ATTR, "View Product");
+        request.setAttribute(CONTENT_PAGE_ATTR, "/views/manager/products/view.jsp");
+        request.getRequestDispatcher(LAYOUT_PATH).forward(request, response);
     }
     
     private void searchProducts(HttpServletRequest request, HttpServletResponse response) 
@@ -156,7 +174,11 @@ public class ManagerProductServlet extends HttpServlet {
         
         request.setAttribute("products", products);
         request.setAttribute("keyword", keyword);
-        request.getRequestDispatcher("/views/manager/products/list.jsp").forward(request, response);
+        
+        // Set layout attributes
+        request.setAttribute(PAGE_TITLE_ATTR, "Product Management");
+        request.setAttribute(CONTENT_PAGE_ATTR, "/views/manager/products/list.jsp");
+        request.getRequestDispatcher(LAYOUT_PATH).forward(request, response);
     }
     
     private void createProduct(HttpServletRequest request, HttpServletResponse response) 
