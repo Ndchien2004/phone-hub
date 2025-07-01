@@ -2,6 +2,7 @@ package model.entity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import util.DateUtil;
 
 public class Product {
     private Integer productId;
@@ -53,4 +54,21 @@ public class Product {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
     public void setProductImages(List<ProductImage> productImages) { this.productImages = productImages; }
+    
+    // Formatted date methods for JSP
+    public String getFormattedCreatedAt() {
+        return DateUtil.formatDate(this.createdAt);
+    }
+    
+    public String getFormattedCreatedAtWithTime() {
+        return DateUtil.formatDateTime(this.createdAt);
+    }
+    
+    public String getFormattedUpdatedAt() {
+        return DateUtil.formatDate(this.updatedAt);
+    }
+    
+    public String getFormattedUpdatedAtWithTime() {
+        return DateUtil.formatDateTime(this.updatedAt);
+    }
 }
