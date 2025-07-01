@@ -495,7 +495,8 @@
                         <c:when test="${not empty sessionScope.cart and not empty sessionScope.cart.items}">
                             <c:forEach var="cartItem" items="${sessionScope.cart.items}">
                                 <div class="product-summary-item">
-                                    <img src="${pageContext.request.contextPath}${cartItem.product.imageUrl}"
+                                    <c:url value="${cartItem.product.imageUrl}" var="fullImageUrl"/>
+                                    <img src="${pageContext.request.contextPath}/${cartItem.product.imageUrl}"
                                          alt="${cartItem.product.productName}">
                                     <div class="product-summary-info">
                                         <div class="name">${cartItem.product.productName}</div>
