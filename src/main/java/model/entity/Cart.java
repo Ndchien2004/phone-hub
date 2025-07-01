@@ -1,40 +1,49 @@
 package model.entity;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "carts")
 @Getter
 @Setter
 public class Cart {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_id")
-    private Integer cartId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @Column(name = "created_at", updatable = false)
+    private int cartId;
+    private Integer userId;
     private LocalDateTime createdAt;
-
-    @Column(name = "total_money")
-    private Long totalMoney = 0L;
-
-    @Column(name = "is_deleted", nullable = false)
+    private long totalMoney = 0;
     private boolean isDeleted = false;
+    private List<CartItem> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems;
+    // CÁC THUỘC TÍNH MỚI ĐƯỢC BỔ SUNG ĐỂ PHÙ HỢP VỚI JSP
+    private long rawTotal;
+    private long shippingFee = 0; // Tạm thời để là 0
+    private long discount = 0; // Tạm thời để là 0
+    private long finalTotal;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public void addItem(CartItem item) {
+        for (CartItem existingItem : items) {
+            if (existingItem.getProductId() == item.getProductId()) {
+                existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+                calculateTotals(); // Cập nhật lại tổng tiền
+                return;
+            }
+        }
+        items.add(item);
+        calculateTotals(); // Cập nhật lại tổng tiền
+    }
+
+    // PHƯƠNG THỨC MỚI ĐỂ TÍNH TOÁN TẤT CẢ CÁC LOẠI TỔNG TIỀN
+    public void calculateTotals() {
+        this.rawTotal = 0;
+        for (CartItem item : items) {
+            this.rawTotal += item.getPrice() * item.getQuantity();
+        }
+        // Logic tính toán phức tạp hơn có thể được thêm vào đây
+        this.finalTotal = this.rawTotal + this.shippingFee - this.discount;
+
+        // Gán cho totalMoney để giữ tương thích với code cũ nếu có
+        this.totalMoney = this.finalTotal;
     }
 }
