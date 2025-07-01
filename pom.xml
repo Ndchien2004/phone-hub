@@ -17,6 +17,7 @@
 
         <junit.version>5.11.0</junit.version>
         <cloudinary.version>2.3.0</cloudinary.version>
+        <finalName>phone-hub</finalName>
     </properties>
 
     <dependencies>
