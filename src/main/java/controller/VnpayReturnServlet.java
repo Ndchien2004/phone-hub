@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @WebServlet("/vnpay-return")
@@ -15,60 +17,70 @@ public class VnpayReturnServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("--- [VnpayReturnServlet] Bắt đầu xử lý kết quả trả về từ VNPAY ---");
+        System.out.println("--- [VnpayReturnServlet] Bắt đầu xử lý kết quả trả về ---");
 
-        // Lấy toàn bộ tham số từ request
-        Map<String, String> vnp_Params = getAllRequestParams(req);
+        // Sử dụng TreeMap để các tham số được sắp xếp theo thứ tự alphabet
+        Map<String, String> fields = new TreeMap<>();
+        for (Enumeration<String> params = req.getParameterNames(); params.hasMoreElements(); ) {
+            String fieldName = params.nextElement();
+            // Quan trọng: Phải decode giá trị nhận về trước khi đưa vào map
+            String fieldValue = req.getParameter(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                fields.put(fieldName, fieldValue);
+            }
+        }
 
-        // Lấy và loại bỏ chữ ký
-        String vnp_SecureHash = vnp_Params.get("vnp_SecureHash");
-        vnp_Params.remove("vnp_SecureHash");
-        vnp_Params.remove("vnp_SecureHashType");
+        // Lấy chữ ký từ VNPAY
+        String vnp_SecureHash = req.getParameter("vnp_SecureHash");
 
-        // Tạo chuỗi dữ liệu để hash lại
-        String hashData = buildHashDataString(vnp_Params);
-        String generatedHash = VnpayConfig.hmacSHA512(VnpayConfig.VNP_HASH_SECRET, hashData);
+        // Xóa chữ ký và loại chữ ký ra khỏi danh sách tham số để tạo lại hash
+        fields.remove("vnp_SecureHashType");
+        fields.remove("vnp_SecureHash");
 
-        // In log debug
-        System.out.println("Hash Data String: " + hashData);
-        System.out.println("SecureHash (received): " + vnp_SecureHash);
-        System.out.println("SecureHash (generated): " + generatedHash);
+        // ==============================================================================
+        // LOGIC TẠO LẠI HASH ĐỂ XÁC THỰC - PHẢI GIỐNG HỆT LÚC TẠO LINK
+        // ==============================================================================
+        StringBuilder hashData = new StringBuilder();
+        for (Map.Entry<String, String> entry : fields.entrySet()) {
+            if (hashData.length() > 0) {
+                hashData.append('&');
+            }
+            try {
+                // Key và Value đều phải được encode
+                hashData.append(URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII.toString()));
+                hashData.append('=');
+                hashData.append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII.toString()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-        if (generatedHash.equals(vnp_SecureHash)) {
-            System.out.println("✅ Chữ ký hợp lệ.");
+        // Tạo lại chữ ký từ dữ liệu nhận được
+        String mySecureHash = VnpayConfig.hmacSHA512(VnpayConfig.VNP_HASH_SECRET, hashData.toString());
 
-            String vnp_ResponseCode = vnp_Params.get("vnp_ResponseCode");
-            String vnp_TxnRef = vnp_Params.get("vnp_TxnRef");
-            String vnp_Amount = vnp_Params.get("vnp_Amount");
-            String vnp_BankCode = vnp_Params.get("vnp_BankCode");
-            String vnp_PayDate = vnp_Params.get("vnp_PayDate");
+        System.out.println("VNPAY Return - Chữ ký nhận được: " + vnp_SecureHash);
+        System.out.println("VNPAY Return - Dữ liệu hash lại: " + hashData.toString());
+        System.out.println("VNPAY Return - Chữ ký tự tạo:   " + mySecureHash);
+
+        // So sánh hai chữ ký
+        if (mySecureHash.equals(vnp_SecureHash)) {
+            System.out.println("Chữ ký hợp lệ.");
+            String vnp_ResponseCode = req.getParameter("vnp_ResponseCode");
 
             if ("00".equals(vnp_ResponseCode)) {
-                // Giao dịch thành công
-                System.out.println("✅ Giao dịch thành công cho đơn hàng: " + vnp_TxnRef);
-
+                System.out.println("Giao dịch VNPAY thành công.");
                 req.setAttribute("message", "Thanh toán qua VNPAY thành công!");
-                req.setAttribute("transactionRef", vnp_TxnRef);
-                req.setAttribute("paymentMethod", "VNPAY");
-                req.setAttribute("amount", vnp_Amount);
-                req.setAttribute("bankCode", vnp_BankCode);
-                req.setAttribute("payDate", vnp_PayDate);
-
+                // Chuyển đến trang xác nhận, bạn có thể truyền thêm mã đơn hàng
+                // req.setAttribute("orderId", req.getParameter("vnp_TxnRef"));
                 req.getRequestDispatcher("/order-confirmation.jsp").forward(req, resp);
             } else {
-                // Giao dịch thất bại
-                System.out.println("❌ Giao dịch thất bại. Mã lỗi: " + vnp_ResponseCode);
-
-                String errorMessage = getErrorMessage(vnp_ResponseCode);
-                req.setAttribute("errorMessage", "Thanh toán qua VNPAY thất bại: " + errorMessage);
-                req.setAttribute("errorCode", vnp_ResponseCode);
-                req.setAttribute("transactionRef", vnp_TxnRef);
+                System.out.println("Giao dịch VNPAY thất bại. Mã lỗi: " + vnp_ResponseCode);
+                req.setAttribute("errorMessage", "Thanh toán qua VNPAY thất bại. Mã lỗi: " + vnp_ResponseCode);
                 req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
             }
-
         } else {
             // Chữ ký không hợp lệ
-            System.err.println("❌ Chữ ký không hợp lệ!");
+            System.err.println("Lỗi: Chữ ký VNPAY không hợp lệ!");
             req.setAttribute("errorMessage", "Giao dịch không hợp lệ do sai chữ ký.");
             req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
         }
