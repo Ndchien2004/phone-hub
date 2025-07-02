@@ -8,63 +8,45 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @WebServlet("/vnpay-return")
 public class VnpayReturnServlet extends HttpServlet {
 
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("--- [VnpayReturnServlet] Bắt đầu xử lý kết quả trả về từ VNPAY ---");
 
-        Map<String, String> fields = new TreeMap<>();
-        for (Enumeration<String> params = req.getParameterNames(); params.hasMoreElements(); ) {
-            String fieldName = params.nextElement();
-            String fieldValue = req.getParameter(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                fields.put(fieldName, fieldValue);
-            }
-        }
+        // Lấy toàn bộ tham số từ request
+        Map<String, String> vnp_Params = getAllRequestParams(req);
 
-        // Debug log
-        System.out.println("Return - Tham số nhận được:");
-        for (Map.Entry<String, String> entry : fields.entrySet()) {
-            System.out.println("  " + entry.getKey() + " = " + entry.getValue());
-        }
+        // Lấy và loại bỏ chữ ký
+        String vnp_SecureHash = vnp_Params.get("vnp_SecureHash");
+        vnp_Params.remove("vnp_SecureHash");
+        vnp_Params.remove("vnp_SecureHashType");
 
-        // Lấy chữ ký từ VNPAY
-        String vnp_SecureHash = req.getParameter("vnp_SecureHash");
+        // Tạo chuỗi dữ liệu để hash lại
+        String hashData = buildHashDataString(vnp_Params);
+        String generatedHash = VnpayConfig.hmacSHA512(VnpayConfig.VNP_HASH_SECRET, hashData);
 
-        // Xóa chữ ký và loại chữ ký ra khỏi danh sách tham số để tạo lại hash
-        Map<String, String> fieldsForHash = new TreeMap<>(fields);
-        fieldsForHash.remove("vnp_SecureHashType");
-        fieldsForHash.remove("vnp_SecureHash");
+        // In log debug
+        System.out.println("Hash Data String: " + hashData);
+        System.out.println("SecureHash (received): " + vnp_SecureHash);
+        System.out.println("SecureHash (generated): " + generatedHash);
 
-        // Sử dụng method buildHashData từ VnpayConfig để đảm bảo nhất quán
-        String hashDataString = VnpayConfig.buildHashData(fieldsForHash);
+        if (generatedHash.equals(vnp_SecureHash)) {
+            System.out.println("✅ Chữ ký hợp lệ.");
 
-        // Tạo lại chữ ký từ dữ liệu nhận được
-        String mySecureHash = VnpayConfig.hmacSHA512(VnpayConfig.VNP_HASH_SECRET, hashDataString);
-
-        System.out.println("Return - Hash data: " + hashDataString);
-        System.out.println("Return - Chữ ký nhận được: " + vnp_SecureHash);
-        System.out.println("Return - Chữ ký tự tạo: " + mySecureHash);
-
-        // So sánh hai chữ ký
-        if (mySecureHash.equals(vnp_SecureHash)) {
-            System.out.println("Return - Chữ ký hợp lệ.");
-            String vnp_ResponseCode = req.getParameter("vnp_ResponseCode");
-            String vnp_TxnRef = req.getParameter("vnp_TxnRef");
-            String vnp_Amount = req.getParameter("vnp_Amount");
-            String vnp_BankCode = req.getParameter("vnp_BankCode");
-            String vnp_PayDate = req.getParameter("vnp_PayDate");
+            String vnp_ResponseCode = vnp_Params.get("vnp_ResponseCode");
+            String vnp_TxnRef = vnp_Params.get("vnp_TxnRef");
+            String vnp_Amount = vnp_Params.get("vnp_Amount");
+            String vnp_BankCode = vnp_Params.get("vnp_BankCode");
+            String vnp_PayDate = vnp_Params.get("vnp_PayDate");
 
             if ("00".equals(vnp_ResponseCode)) {
                 // Giao dịch thành công
-                System.out.println("Return - Giao dịch VNPAY thành công cho đơn hàng: " + vnp_TxnRef);
+                System.out.println("✅ Giao dịch thành công cho đơn hàng: " + vnp_TxnRef);
 
-                // Truyền thông tin để hiển thị
                 req.setAttribute("message", "Thanh toán qua VNPAY thành công!");
                 req.setAttribute("transactionRef", vnp_TxnRef);
                 req.setAttribute("paymentMethod", "VNPAY");
@@ -75,51 +57,69 @@ public class VnpayReturnServlet extends HttpServlet {
                 req.getRequestDispatcher("/order-confirmation.jsp").forward(req, resp);
             } else {
                 // Giao dịch thất bại
-                System.out.println("Return - Giao dịch VNPAY thất bại cho đơn hàng: " + vnp_TxnRef + ". Mã lỗi: " + vnp_ResponseCode);
+                System.out.println("❌ Giao dịch thất bại. Mã lỗi: " + vnp_ResponseCode);
 
-                // Mapping một số mã lỗi phổ biến
-                String errorDetail = getErrorMessage(vnp_ResponseCode);
-
-                req.setAttribute("errorMessage", "Thanh toán qua VNPAY thất bại: " + errorDetail);
+                String errorMessage = getErrorMessage(vnp_ResponseCode);
+                req.setAttribute("errorMessage", "Thanh toán qua VNPAY thất bại: " + errorMessage);
                 req.setAttribute("errorCode", vnp_ResponseCode);
                 req.setAttribute("transactionRef", vnp_TxnRef);
                 req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
             }
+
         } else {
             // Chữ ký không hợp lệ
-            System.err.println("Return - Lỗi: Chữ ký VNPAY không hợp lệ!");
+            System.err.println("❌ Chữ ký không hợp lệ!");
             req.setAttribute("errorMessage", "Giao dịch không hợp lệ do sai chữ ký.");
             req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
         }
     }
 
-    // Thêm method để mapping mã lỗi VNPAY
+    /** Lấy tất cả tham số từ request và đưa vào Map */
+    private Map<String, String> getAllRequestParams(HttpServletRequest req) {
+        Map<String, String> params = new HashMap<>();
+        Enumeration<String> paramNames = req.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String param = paramNames.nextElement();
+            String value = req.getParameter(param);
+            if (value != null && !value.isEmpty()) {
+                params.put(param, value);
+            }
+        }
+        return params;
+    }
+
+    /** Tạo chuỗi hashData theo định dạng key=value&key=value... (sắp xếp theo key) */
+    private String buildHashDataString(Map<String, String> params) {
+        List<String> keys = new ArrayList<>(params.keySet());
+        Collections.sort(keys);
+        StringBuilder hashData = new StringBuilder();
+        for (String key : keys) {
+            String value = params.get(key);
+            if (value != null && !value.isEmpty()) {
+                if (hashData.length() > 0) {
+                    hashData.append('&');
+                }
+                hashData.append(key).append('=').append(value);
+            }
+        }
+        return hashData.toString();
+    }
+
+    /** Mapping mã lỗi */
     private String getErrorMessage(String responseCode) {
         switch (responseCode) {
-            case "07":
-                return "Trừ tiền thành công. Giao dịch bị nghi ngờ (liên quan tới lừa đảo, giao dịch bất thường).";
-            case "09":
-                return "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng.";
-            case "10":
-                return "Giao dịch không thành công do: Khách hàng xác thực thông tin thẻ/tài khoản không đúng quá 3 lần";
-            case "11":
-                return "Giao dịch không thành công do: Đã hết hạn chờ thanh toán. Xin quý khách vui lòng thực hiện lại giao dịch.";
-            case "12":
-                return "Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng bị khóa.";
-            case "13":
-                return "Giao dịch không thành công do Quý khách nhập sai mật khẩu xác thực giao dịch (OTP).";
-            case "24":
-                return "Giao dịch không thành công do: Khách hàng hủy giao dịch";
-            case "51":
-                return "Giao dịch không thành công do: Tài khoản của quý khách không đủ số dư để thực hiện giao dịch.";
-            case "65":
-                return "Giao dịch không thành công do: Tài khoản của Quý khách đã vượt quá hạn mức giao dịch trong ngày.";
-            case "75":
-                return "Ngân hàng thanh toán đang bảo trì.";
-            case "79":
-                return "Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định.";
-            default:
-                return "Lỗi không xác định (Mã: " + responseCode + ")";
+            case "07": return "Trừ tiền thành công. Giao dịch bị nghi ngờ.";
+            case "09": return "Thẻ/Tài khoản chưa đăng ký InternetBanking.";
+            case "10": return "Sai thông tin xác thực quá 3 lần.";
+            case "11": return "Hết hạn chờ thanh toán.";
+            case "12": return "Thẻ/Tài khoản bị khóa.";
+            case "13": return "Sai mật khẩu xác thực (OTP).";
+            case "24": return "Khách hàng hủy giao dịch.";
+            case "51": return "Tài khoản không đủ số dư.";
+            case "65": return "Vượt quá hạn mức giao dịch.";
+            case "75": return "Ngân hàng đang bảo trì.";
+            case "79": return "Sai mật khẩu thanh toán quá số lần.";
+            default: return "Lỗi không xác định (Mã: " + responseCode + ")";
         }
     }
 }
