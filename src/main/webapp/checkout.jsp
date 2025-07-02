@@ -405,21 +405,19 @@
             font-weight: bold;
         }
 
-        #step1-summary-view {
-            display: none;
-        }
+        /* ----- LOGIC CSS CHO VIỆC CHUYỂN STEP ----- */
+        /* Mặc định (Step 1) */
+        #step1-summary-view { display: none; }
+        #payment-method-section { display: none; }
+        #step2-button-wrapper { display: none; }
 
-        #checkout-form.on-step-2 #step1-view {
-            display: none;
-        }
-
-        #checkout-form.on-step-2 #step1-summary-view {
-            display: block;
-        }
-
-        #checkout-form.on-step-2 #payment-method-section {
-            display: block;
-        }
+        /* Khi ở Step 2 (thêm class on-step-2 vào form) */
+        #checkout-form.on-step-2 #step1-view { display: none; }
+        #checkout-form.on-step-2 #step1-summary-view { display: block; }
+        #checkout-form.on-step-2 #payment-method-section { display: block; }
+        #checkout-form.on-step-2 #step1-button-wrapper { display: none; }
+        #checkout-form.on-step-2 #step2-button-wrapper { display: flex; }
+        /* ----- HẾT LOGIC CSS ----- */
 
         .info-summary-card {
             display: flex;
@@ -467,15 +465,16 @@
 </head>
 <body>
 
-<form id="checkout-form" method="post" novalidate>
+<%-- THAY ĐỔI: Thêm class="on-step-2" để mặc định hiển thị ở bước thanh toán --%>
+<form id="checkout-form" method="post" novalidate class="on-step-2">
     <header class="checkout-header">
         <div class="header-main">
             <a href="cart.jsp" class="back-arrow"><i class="fa-solid fa-arrow-left"></i></a>
-            <h1 class="title" id="header-title">Thông tin</h1>
+            <h1 class="title" id="header-title">Thanh toán</h1>
         </div>
         <div class="checkout-steps">
-            <span class="step active" id="step1-indicator">1. THÔNG TIN</span>
-            <span class="step" id="step2-indicator">2. THANH TOÁN</span>
+            <span class="step" id="step1-indicator">1. THÔNG TIN</span>
+            <span class="step active" id="step2-indicator">2. THANH TOÁN</span>
         </div>
     </header>
 
@@ -516,6 +515,7 @@
                     </c:choose>
                 </div>
 
+                <%-- View này chứa form nhập liệu, mặc định sẽ bị ẩn đi --%>
                 <div id="step1-view">
                     <div class="card">
                         <h3 class="card-title">Thông tin khách hàng</h3>
@@ -614,6 +614,7 @@
                     </div>
                 </div>
 
+                <%-- View này hiển thị thông tin tóm tắt, mặc định sẽ hiện ra --%>
                 <div id="step1-summary-view">
                     <div class="card info-summary-card">
                         <div class="info-summary-block">
@@ -640,7 +641,8 @@
                     </div>
                 </div>
 
-                <div class="card" id="payment-method-section" style="display: none;">
+                <%-- Mục thanh toán, mặc định sẽ hiện ra --%>
+                <div class="card" id="payment-method-section">
                     <h3 class="card-title">Phương Thức Thanh Toán</h3>
                     <div class="payment-method-option">
                         <div class="form-check">
@@ -651,8 +653,14 @@
                     </div>
                     <div class="payment-method-option">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="VNPAY">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="PAYOS">
                             <label class="form-check-label" for="vnpay">Thanh toán qua mã QR PayOS</label>
+                        </div>
+                    </div>
+                    <div class="payment-method-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="VNPAY">
+                            <label class="form-check-label" for="vnpay">Thanh toán qua VNPAY (Thẻ ATM/Visa/QR)</label>
                         </div>
                     </div>
                 </div>
@@ -683,10 +691,12 @@
                         </div>
                     </div>
                     <div class="checkout-footer">
+                        <%-- Nút cho Step 1 (Chỉnh sửa thông tin) --%>
                         <div id="step1-button-wrapper" class="button-wrapper">
                             <button type="button" id="next-step-btn" class="btn-submit">Tiếp tục</button>
                         </div>
-                        <div id="step2-button-wrapper" class="button-wrapper" style="display: none;">
+                        <%-- Nút cho Step 2 (Thanh toán) --%>
+                        <div id="step2-button-wrapper" class="button-wrapper">
                             <label class="terms-label">
                                 <input type="checkbox" id="terms-checkbox">
                                 <span>Tôi đồng ý với các <a href="dieu-khoan-giao-dich.html" target="_blank">điều khoản và điều kiện giao dịch</a> của cửa hàng.</span>
@@ -703,17 +713,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // --- CÁC BIẾN DOM ---
         const checkoutForm = document.getElementById('checkout-form');
-        const step1View = document.getElementById('step1-view');
-        const step1SummaryView = document.getElementById('step1-summary-view');
-        const paymentSection = document.getElementById('payment-method-section');
         const nextStepBtn = document.getElementById('next-step-btn');
         const backToStep1Btn = document.getElementById('back-to-step1-btn');
         const headerTitle = document.getElementById('header-title');
         const step1Indicator = document.getElementById('step1-indicator');
         const step2Indicator = document.getElementById('step2-indicator');
-        const step1ButtonWrapper = document.getElementById('step1-button-wrapper');
-        const step2ButtonWrapper = document.getElementById('step2-button-wrapper');
         const termsCheckbox = document.getElementById('terms-checkbox');
         const submitBtn = document.getElementById('submit-order-btn');
         const recipientName = document.getElementById('recipientName');
@@ -733,6 +739,7 @@
         const editShippingInfo = document.getElementById('edit-shipping-info');
         const cartIsEmpty = !(${not empty sessionScope.cart and not empty sessionScope.cart.items});
 
+        // --- CÁC HÀM VALIDATE ---
         const showError = (input, message) => {
             input.classList.add('is-invalid');
             const errorDiv = document.getElementById(input.id + 'Error');
@@ -798,6 +805,62 @@
             return true;
         };
 
+        // --- LOGIC CHÍNH ĐÃ SỬA ---
+
+        /**
+         * Kiểm tra "âm thầm" xem tất cả thông tin có hợp lệ hay không.
+         * Không hiển thị lỗi ra giao diện, chỉ trả về true/false.
+         */
+        function isAllInformationValid() {
+            const isNameOk = /^[\p{L}\s]{2,50}$/u.test(recipientName.value.trim());
+            const isPhoneOk = /^0\d{9}$/.test(recipientPhone.value.trim());
+            const isEmailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.value.trim());
+            const isAddressOk = shippingAddress.value.trim() !== '';
+            const isCityOk = shippingCity.value.trim() !== '';
+            const isDistrictOk = shippingDistrict.value.trim() !== '';
+            const isWardOk = shippingWard.value.trim() !== '';
+
+            return isNameOk && isPhoneOk && isEmailOk && isAddressOk && isCityOk && isDistrictOk && isWardOk;
+        }
+
+        /**
+         * Hàm trung tâm để quản lý trạng thái của nút "Thanh toán".
+         */
+        function updateSubmitButtonState() {
+            const infoValid = isAllInformationValid();
+            const termsChecked = termsCheckbox.checked;
+            submitBtn.disabled = !(infoValid && termsChecked);
+        }
+
+        // Cập nhật thông tin tóm tắt
+        function updateSummaryView() {
+            summaryName.textContent = recipientName.value || 'Chưa có thông tin';
+            summaryPhone.textContent = recipientPhone.value || 'Chưa có thông tin';
+            summaryEmail.textContent = recipientEmail.value || 'Chưa có thông tin';
+
+            const addressParts = [
+                shippingAddress.value,
+                shippingWard.value ? shippingWard.options[shippingWard.selectedIndex].text : '',
+                shippingDistrict.value ? shippingDistrict.options[shippingDistrict.selectedIndex].text : '',
+                shippingCity.value ? shippingCity.options[shippingCity.selectedIndex].text : ''
+            ].filter(part => part && part.trim() !== '' && part.trim() !== '-- Chọn Phường/Xã --' && part.trim() !== '-- Chọn Quận/Huyện --' && part.trim() !== '-- Chọn Tỉnh/Thành phố --');
+
+            if (addressParts.length > 0) {
+                summaryAddress.textContent = addressParts.join(', ');
+            } else {
+                summaryAddress.textContent = 'Chưa có thông tin';
+            }
+
+
+            if (note.value.trim()) {
+                summaryNote.textContent = `Ghi chú: ${note.value.trim()}`;
+                summaryNote.style.display = 'block';
+            } else {
+                summaryNote.style.display = 'none';
+            }
+        }
+
+        // Chuyển sang màn hình Step 2 (Thanh toán)
         function goToStep2() {
             const isNameValid = validateName();
             const isPhoneValid = validatePhone();
@@ -816,67 +879,54 @@
                 return;
             }
 
-            summaryName.textContent = recipientName.value;
-            summaryPhone.textContent = recipientPhone.value;
-            summaryEmail.textContent = recipientEmail.value;
-
-            const addressParts = [
-                shippingAddress.value,
-                shippingWard.value ? shippingWard.options[shippingWard.selectedIndex].text : '',
-                shippingDistrict.value ? shippingDistrict.options[shippingDistrict.selectedIndex].text : '',
-                shippingCity.value ? shippingCity.options[shippingCity.selectedIndex].text : ''
-            ].filter(part => part && part.trim() !== '');
-
-            const fullAddress = addressParts.join(', ');
-            summaryAddress.textContent = fullAddress;
-
-            if (note.value.trim()) {
-                summaryNote.textContent = `Ghi chú: ${note.value.trim()}`;
-                summaryNote.style.display = 'block';
-            } else {
-                summaryNote.style.display = 'none';
-            }
+            updateSummaryView();
 
             checkoutForm.classList.add('on-step-2');
-            document.getElementById('payment-method-section').style.display = 'block';
-            step1ButtonWrapper.style.display = 'none';
-            step2ButtonWrapper.style.display = 'flex';
             headerTitle.textContent = 'Thanh toán';
             step1Indicator.classList.remove('active');
             step2Indicator.classList.add('active');
             window.scrollTo({top: 0, behavior: 'smooth'});
+
+            // Sau khi quay lại Step 2 thành công, kiểm tra lại trạng thái nút submit.
+            updateSubmitButtonState();
         }
 
+        // Quay về màn hình Step 1 (Chỉnh sửa thông tin)
         function goToStep1() {
             checkoutForm.classList.remove('on-step-2');
-            document.getElementById('payment-method-section').style.display = 'none';
-            step2ButtonWrapper.style.display = 'none';
-            step1ButtonWrapper.style.display = 'flex';
             headerTitle.textContent = 'Thông tin';
             step2Indicator.classList.remove('active');
             step1Indicator.classList.add('active');
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
+        // Xử lý khi submit form
         function handleFormSubmit(event) {
             event.preventDefault();
+
+            // Kiểm tra lần cuối cùng trước khi gửi
+            if (!isAllInformationValid() || !termsCheckbox.checked) {
+                // Hiển thị thông báo nếu người dùng cố tình submit khi nút bị vô hiệu hóa (ví dụ: qua console)
+                alert('Vui lòng cung cấp đầy đủ thông tin và đồng ý với điều khoản giao dịch.');
+                return;
+            }
+
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span></span> Đang xử lý...';
+
             setTimeout(() => {
                 const formData = new FormData(checkoutForm);
                 const paymentMethod = formData.get('paymentMethod');
                 if (paymentMethod === 'COD') {
                     checkoutForm.action = 'checkout';
                     checkoutForm.submit();
-                } else if (paymentMethod === 'VNPAY') {
+                } else if (paymentMethod === 'PAYOS') {
                     fetch('create-link', {
                         method: 'POST',
                         body: new URLSearchParams(formData)
                     })
                         .then(response => {
-                            if (!response.ok) return response.json().then(err => {
-                                throw new Error(err.error || 'Lỗi server')
-                            });
+                            if (!response.ok) return response.json().then(err => { throw new Error(err.error || 'Lỗi server') });
                             return response.json();
                         })
                         .then(data => {
@@ -889,6 +939,28 @@
                         .catch(error => {
                             console.error('Fetch Error:', error);
                             alert('Lỗi: ' + error.message);
+                            submitBtn.disabled = !termsCheckbox.checked;
+                            submitBtn.innerHTML = 'Thanh toán';
+                        });
+                } else if (paymentMethod === 'VNPAY') {
+                    fetch('create-vnpay-link', {
+                        method: 'POST',
+                        body: new URLSearchParams(formData)
+                    })
+                        .then(response => {
+                            if (!response.ok) return response.json().then(err => { throw new Error(err.error || 'Lỗi server') });
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data && data.paymentUrl) {
+                                window.location.href = data.paymentUrl;
+                            } else {
+                                throw new Error('Không nhận được link thanh toán VNPAY.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi tạo link VNPAY:', error);
+                            alert('Lỗi: ' + error.message);
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = 'Thanh toán';
                         });
@@ -896,21 +968,29 @@
             }, 100);
         }
 
+        // --- GÁN SỰ KIỆN ---
+
         if (nextStepBtn) nextStepBtn.addEventListener('click', goToStep2);
         if (backToStep1Btn) backToStep1Btn.addEventListener('click', goToStep1);
         if (editCustomerInfo) editCustomerInfo.addEventListener('click', goToStep1);
         if (editShippingInfo) editShippingInfo.addEventListener('click', goToStep1);
 
         if (checkoutForm) checkoutForm.addEventListener('submit', handleFormSubmit);
-        if (termsCheckbox) termsCheckbox.addEventListener('change', function () {
-            submitBtn.disabled = !this.checked;
-        });
 
-        if (cartIsEmpty) {
-            if (step1ButtonWrapper) step1ButtonWrapper.style.display = 'none';
-            if (step1View) step1View.style.display = 'none';
+        // Khi checkbox thay đổi, gọi hàm kiểm tra tổng hợp.
+        if (termsCheckbox) {
+            termsCheckbox.addEventListener('change', updateSubmitButtonState);
         }
 
+        if (cartIsEmpty) {
+            document.getElementById('step1-button-wrapper').style.display = 'none';
+            document.getElementById('step2-button-wrapper').style.display = 'none';
+            if (document.getElementById('step1-view')) document.getElementById('step1-view').style.display = 'none';
+            if (document.getElementById('step1-summary-view')) document.getElementById('step1-summary-view').style.display = 'none';
+            if (document.getElementById('payment-method-section')) document.getElementById('payment-method-section').style.display = 'none';
+        }
+
+        // Gán sự kiện validate khi người dùng rời khỏi ô input
         recipientName.addEventListener('blur', validateName);
         recipientPhone.addEventListener('blur', validatePhone);
         recipientEmail.addEventListener('blur', validateEmail);
@@ -918,6 +998,14 @@
         shippingCity.addEventListener('change', () => validateRequiredField(shippingCity, 'Vui lòng chọn Tỉnh/Thành phố.'));
         shippingDistrict.addEventListener('change', () => validateRequiredField(shippingDistrict, 'Vui lòng chọn Quận/Huyện.'));
         shippingWard.addEventListener('change', () => validateRequiredField(shippingWard, 'Vui lòng chọn Phường/Xã.'));
+
+        // --- KHỞI TẠO BAN ĐẦU ---
+
+        // Cập nhật thông tin tóm tắt ngay khi tải trang
+        updateSummaryView();
+
+        // Ngay khi trang tải xong, gọi hàm kiểm tra tổng hợp để đặt trạng thái ban đầu cho nút "Thanh toán".
+        updateSubmitButtonState();
     });
 </script>
 

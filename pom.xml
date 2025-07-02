@@ -16,7 +16,6 @@
         <maven.compiler.target>21</maven.compiler.target>
 
         <junit.version>5.11.0</junit.version>
-        <cloudinary.version>2.3.0</cloudinary.version>
         <finalName>phone-hub</finalName>
     </properties>
 
@@ -69,7 +68,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.13</version> <!-- Hoặc phiên bản mới hơn -->
+            <version>2.0.13</version>
         </dependency>
 
         <!-- === Cloudinary === -->
@@ -78,6 +77,7 @@
             <artifactId>cloudinary-core</artifactId>
             <version>2.3.0</version>
         </dependency>
+
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http5</artifactId>
