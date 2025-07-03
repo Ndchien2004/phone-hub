@@ -17,8 +17,8 @@ import java.util.Optional;
 
 /**
  * Đây là một servlet dùng để test.
- * Nó sẽ tự động lấy một sản phẩm (ID = 1), tạo giỏ hàng,
- * thêm sản phẩm đó vào giỏ, lưu vào session, và chuyển hướng đến trang /checkout.
+ * Nó sẽ tự động lấy các sản phẩm có ID từ 1 đến 9, tạo giỏ hàng,
+ * thêm các sản phẩm đó vào giỏ, lưu vào session, và chuyển hướng đến trang /checkout.
  */
 @WebServlet("/setup-cart")
 public class SetupCartServlet extends HttpServlet {
@@ -27,39 +27,50 @@ public class SetupCartServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("--- [SetupCartServlet] Bắt đầu xử lý ---");
+        System.out.println("--- [SetupCartServlet] Bắt đầu xử lý với nhiều sản phẩm ---");
         try {
-            // Bước 1: Gọi ProductService để lấy thông tin sản phẩm
-            // Sử dụng Optional để xử lý trường hợp không tìm thấy sản phẩm một cách an toàn
-            Optional<Product> productOptional = productService.getProductById(1);
+            // Bước 1: Tạo một đối tượng Cart mới
+            Cart cart = new Cart();
+            System.out.println("Đã tạo một giỏ hàng mới.");
 
-            if (!productOptional.isPresent()) {
-                System.err.println("LỖI: Không tìm thấy sản phẩm có ID = 1 trong cơ sở dữ liệu.");
-                // Có thể chuyển hướng đến một trang lỗi nếu muốn
-                resp.getWriter().write("Error: Product with ID 1 not found.");
+            // BƯỚC 2: BỔ SUNG - Dùng vòng lặp để lấy sản phẩm từ ID 1 đến 9
+            for (int productId = 1; productId <= 11; productId++) {
+                // Gọi ProductService để lấy thông tin sản phẩm
+                Optional<Product> productOptional = productService.getProductById(productId);
+
+                // Kiểm tra xem sản phẩm có tồn tại không
+                if (productOptional.isPresent()) {
+                    Product product = productOptional.get();
+                    System.out.println("  -> Đã lấy thành công sản phẩm ID " + productId + ": " + product.getProductName());
+
+                    // Tạo đối tượng CartItem cho sản phẩm này
+                    CartItem cartItem = new CartItem();
+                    cartItem.setProductId(product.getProductId());
+                    cartItem.setQuantity(1); // Mặc định số lượng là 1 để test
+                    cartItem.setPrice(product.getPriceSale()); // Lấy giá bán từ sản phẩm
+                    cartItem.setProduct(product); // Gắn đối tượng product để tiện hiển thị ở JSP
+
+                    // Thêm CartItem vào Cart
+                    cart.addItem(cartItem);
+                    System.out.println("     => Đã thêm '" + product.getProductName() + "' vào giỏ hàng.");
+
+                } else {
+                    // Nếu sản phẩm không tồn tại, chỉ in ra cảnh báo và tiếp tục vòng lặp
+                    System.err.println("  -> CẢNH BÁO: Không tìm thấy sản phẩm có ID = " + productId + ". Bỏ qua sản phẩm này.");
+                }
+            } // Kết thúc vòng lặp
+
+            // Kiểm tra xem giỏ hàng có rỗng không sau khi lặp
+            if (cart.getItems().isEmpty()) {
+                System.err.println("LỖI: Không thêm được sản phẩm nào vào giỏ hàng. Có thể tất cả các ID từ 1-9 đều không tồn tại.");
+                resp.getWriter().write("Error: No products could be added to the cart. Please check the database.");
                 return;
             }
 
-            // Nếu tìm thấy, lấy đối tượng Product ra
-            Product product = productOptional.get();
-            System.out.println("Đã lấy thành công sản phẩm: " + product.getProductName());
-
-            // Bước 2: Tạo đối tượng Cart và CartItem
-            Cart cart = new Cart();
-            CartItem cartItem = new CartItem();
-
-            cartItem.setProductId(product.getProductId());
-            cartItem.setQuantity(1); // Mặc định số lượng là 1 để test
-            cartItem.setPrice(product.getPriceSale()); // Lấy giá bán từ sản phẩm
-            cartItem.setProduct(product); // Gắn đối tượng product để tiện hiển thị ở JSP
-
-            System.out.println("Đã tạo CartItem cho sản phẩm: " + product.getProductName() + " với giá: " + cartItem.getPrice());
-
-            // Bước 3: Thêm CartItem vào Cart
-            cart.addItem(cartItem);
-            cart.calculateTotals(); // Tính toán tất cả các giá trị tổng tiền
-            System.out.println("Đã thêm item vào giỏ hàng. Tổng tiền cuối cùng: " + cart.getFinalTotal());
-            System.out.println("Đã thêm item vào giỏ hàng. Tổng số loại sản phẩm: " + cart.getItems().size());
+            // Bước 3: Tính toán lại tổng tiền sau khi đã thêm tất cả sản phẩm
+            cart.calculateTotals();
+            System.out.println("Đã thêm tất cả các sản phẩm hợp lệ vào giỏ hàng. Tổng số loại sản phẩm: " + cart.getItems().size());
+            System.out.println("Tổng tiền cuối cùng sau khi tính toán: " + cart.getFinalTotal());
 
             // Bước 4: Lưu đối tượng Cart vào session
             HttpSession session = req.getSession();
