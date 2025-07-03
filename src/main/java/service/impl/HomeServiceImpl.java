@@ -34,37 +34,33 @@ public class HomeServiceImpl implements HomeService {
     }
 
     @Override
-    public PageResult<ProductDTO> searchByName(String keyword, int page, int pageSize) {
-        List<Product> filtered = productDAO.searchByName(keyword);
-        return paginateAndConvert(filtered, page, pageSize);
-    }
+    //Search by Name, Category, Price
+    public PageResult<ProductDTO> search(String keyword, List<Integer> categoryId, BigDecimal min, BigDecimal max, int page, int pageSize) {
+        List<Product> products = productDAO.findAll();
 
-    @Override
-    public PageResult<ProductDTO> searchByCategory(String categoryName, int page, int pageSize) {
-        List<Setting> categories = settingDAO.findByType("category");
-        Optional<Setting> match = categories.stream()
-                .filter(c -> c.getName().equalsIgnoreCase(categoryName))
-                .findFirst();
-
-        if (match.isEmpty()) {
-            return new PageResult<>(); // Empty result
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            products = products.stream()
+                    .filter(p -> p.getProductName().toLowerCase().contains(keyword.toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
-        List<Product> filtered = productDAO.findByCategory(match.get().getSettingId());
-        return paginateAndConvert(filtered, page, pageSize);
-    }
+        if (categoryId != null && !categoryId.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> categoryId.contains(p.getCategoryId()))
+                    .collect(Collectors.toList());
+        }
 
-    @Override
-    public PageResult<ProductDTO> searchByPriceRange(BigDecimal min, BigDecimal max, int page, int pageSize) {
-        List<Product> all = productDAO.findAll();
-        List<Product> filtered = all.stream()
-                .filter(p -> {
-                    BigDecimal price = BigDecimal.valueOf(p.getPriceSale());
-                    return (min == null || price.compareTo(min) >= 0) &&
-                            (max == null || price.compareTo(max) <= 0);
-                })
-                .collect(Collectors.toList());
-        return paginateAndConvert(filtered, page, pageSize);
+        if (min != null || max != null) {
+            products = products.stream()
+                    .filter(p -> {
+                        BigDecimal price = BigDecimal.valueOf(p.getPriceSale());
+                        return (min == null || price.compareTo(min) >= 0) &&
+                                (max == null || price.compareTo(max) <= 0);
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return paginateAndConvert(products, page, pageSize);
     }
 
     public List<Setting> getAllCategories() {
