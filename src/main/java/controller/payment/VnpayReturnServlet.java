@@ -1,4 +1,4 @@
-package controller;
+package controller.payment;
 
 import config.VnpayConfig;
 import jakarta.servlet.ServletException;

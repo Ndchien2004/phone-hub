@@ -1,4 +1,4 @@
-package controller;
+package controller.checkout;
 
 import model.entity.Cart;
 import model.entity.CartItem;
