@@ -65,11 +65,14 @@
 
         <!-- Right side items -->
         <div class="d-flex align-items-center">
+
             <!-- Cart Icon -->
             <div class="position-relative me-3">
-                <a href="/cart">
+                <a href="cart.jsp">
                     <i class="fas fa-shopping-cart fa-lg text-primary"></i>
-                    <span class="cart-badge" id="cartCount">3</span>
+                    <span class="cart-badge" id="cartCount">
+                        ${sessionScope.cartCount != null ? sessionScope.cartCount : 0}
+                    </span>
                 </a>
             </div>
 
@@ -153,6 +156,10 @@
             <div class="row g-4" id="productsContainer">
 
                 <!--Test truc tiep du lieu lay duoc-->
+                <%--<c:forEach var="product" items="${sessionScope.cart.items}">
+                    Cart Item:
+                    ${product}<br>
+                </c:forEach>--%>
 <%--                <p>minPrice = '${minPrice}', maxPrice = '${maxPrice}'</p>--%>
                 <%--<p>Hiện có: ${fn:length(pageResult.content)} sản phẩm</p>
                 <c:forEach var="product" items="${pageResult.content}">
@@ -185,10 +192,17 @@
                                                                               minFractionDigits="0"/> VNĐ
                                     </div>
                                 </div>
+
+                                <%--Add to Cart Button--%>
                                 <div class="mt-auto">
-                                    <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="addToCart(1)">
-                                        <i class="fas fa-cart-plus me-1"></i>Thêm vào giỏ
-                                    </button>
+                                    <form action="${pageContext.request.contextPath}/add-to-cart" method="get">
+                                        <input type="hidden" name="productId" value="${product.id}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="price" value="${product.priceSale}">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                                            <i class="fas fa-cart-plus me-1"></i> Thêm vào giỏ
+                                        </button>
+                                    </form>
                                     <button class="btn btn-primary btn-sm w-100">
                                         <i class="fas fa-bolt me-1"></i>Mua ngay
                                     </button>
