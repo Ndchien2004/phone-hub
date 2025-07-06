@@ -68,7 +68,7 @@
 
             <!-- Cart Icon -->
             <div class="position-relative me-3">
-                <a href="cart.jsp">
+                <a href="../cart/cart.jsp">
                     <i class="fas fa-shopping-cart fa-lg text-primary"></i>
                     <span class="cart-badge" id="cartCount">
                         ${sessionScope.cartCount != null ? sessionScope.cartCount : 0}

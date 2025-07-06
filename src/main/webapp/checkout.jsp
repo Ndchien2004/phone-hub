@@ -696,7 +696,7 @@
 <form id="checkout-form" method="post" novalidate class="on-step-2">
     <header class="checkout-header">
         <div class="header-main">
-            <a href="cart.jsp" class="back-arrow"><i class="fa-solid fa-arrow-left"></i></a>
+            <a href="views/cart/cart.jsp" class="back-arrow"><i class="fa-solid fa-arrow-left"></i></a>
             <h1 class="title" id="header-title">Thanh toán</h1>
         </div>
         <div class="checkout-steps">

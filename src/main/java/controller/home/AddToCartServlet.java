@@ -1,4 +1,4 @@
-package controller;
+package controller.home;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

@@ -148,7 +148,7 @@
             <h4 class="text-primary fw-bold">
               <fmt:formatNumber value="${cart.totalMoney}" type="currency" currencySymbol="$" />
             </h4>
-            <a href="checkout.jsp" class="btn btn-primary btn-lg mt-2">Confirm Order</a>
+            <a href="../../checkout.jsp" class="btn btn-primary btn-lg mt-2">Confirm Order</a>
           </div>
         </div>
       </c:if>
