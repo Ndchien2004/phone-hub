@@ -1,4 +1,4 @@
-package controller;
+package controller.payment;
 
 import com.google.gson.Gson;
 import model.entity.Cart;
@@ -10,12 +10,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.payos.type.CheckoutResponseData;
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet("/create-link")
-public class CreatePaymentLinkServlet extends HttpServlet {
+@WebServlet("/create-vnpay-link")
+public class CreateVnpayLinkServlet extends HttpServlet {
     private final OrderService orderService = new OrderServiceImpl();
     private final Gson gson = new Gson();
 
@@ -27,10 +26,6 @@ public class CreatePaymentLinkServlet extends HttpServlet {
 
         try {
             HttpSession session = req.getSession(false);
-            if (session == null) {
-                throw new IllegalStateException("Phiên làm việc đã hết hạn.");
-            }
-
             Cart cart = (Cart) session.getAttribute("cart");
             if (cart == null || cart.getItems().isEmpty()) {
                 throw new IllegalStateException("Giỏ hàng rỗng.");
@@ -39,27 +34,23 @@ public class CreatePaymentLinkServlet extends HttpServlet {
             String name = req.getParameter("recipientName");
             String email = req.getParameter("recipientEmail");
             String phone = req.getParameter("recipientPhone");
-            String shippingAddress = req.getParameter("shippingAddress");
-            String shippingCity = req.getParameter("shippingCity");
-            String shippingDistrict = req.getParameter("shippingDistrict");
-            String shippingWard = req.getParameter("shippingWard");
+            String address = String.join(", ", req.getParameter("shippingAddress"), req.getParameter("shippingWard"), req.getParameter("shippingDistrict"), req.getParameter("shippingCity"));
             String note = req.getParameter("note");
-            String fullAddress = String.join(", ", shippingAddress, shippingWard, shippingDistrict, shippingCity);
 
-            // TRUYỀN THAM SỐ "PAYOS" VÀO ĐÂY
-            Order pendingOrder = orderService.createOrderFromGuestCart(cart, name, email, phone, fullAddress, note, "PayOS");
-
+            // Tạo đơn hàng với phương thức là VNPAY
+            Order pendingOrder = orderService.createOrderFromGuestCart(cart, name, email, phone, address, note, "VNPAY");
             if (pendingOrder == null) {
                 throw new RuntimeException("Không thể tạo đơn hàng.");
             }
 
-            CheckoutResponseData paymentLinkData = orderService.createPaymentLink(pendingOrder, req);
+            // Gọi service để tạo URL thanh toán
+            String paymentUrl = orderService.createVnpayPaymentUrl(pendingOrder, req);
 
-            // Chỉ xóa giỏ hàng nếu tạo link thành công
+            // Xóa giỏ hàng sau khi đã tạo link thành công
             session.removeAttribute("cart");
 
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().write(gson.toJson(paymentLinkData));
+            resp.getWriter().write(gson.toJson(Map.of("paymentUrl", paymentUrl)));
 
         } catch (Exception e) {
             e.printStackTrace();

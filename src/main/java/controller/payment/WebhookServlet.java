@@ -1,4 +1,4 @@
-package controller;
+package controller.payment;
 
 import com.google.gson.Gson;
 import config.PayOSConfig;

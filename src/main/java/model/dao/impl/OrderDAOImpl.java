@@ -4,12 +4,15 @@ import model.dao.DBContext;
 import model.dao.OrderDAO;
 import model.entity.Order;
 import model.entity.OrderItem;
+import model.entity.Product;
+import model.entity.Setting;
+
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class OrderDAOImpl implements OrderDAO {
-
-    // Trong file model/dao/impl/OrderDAOImpl.java
 
     @Override
     public int saveOrder(Order order) {
@@ -19,13 +22,9 @@ public class OrderDAOImpl implements OrderDAO {
         // Sử dụng try-with-resources để đảm bảo kết nối được đóng
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            // Xử lý các giá trị có thể là NULL một cách an toàn
-            // Dùng setObject là cách tốt nhất vì nó có thể xử lý cả giá trị và null
             ps.setObject(1, order.getUserId(), Types.INTEGER);
             ps.setObject(2, order.getPaymentMethodId(), Types.INTEGER);
             ps.setObject(3, order.getStatusId(), Types.INTEGER);
-
             ps.setString(4, order.getEmail());
             ps.setString(5, order.getFullName());
             ps.setString(6, order.getAddress());
@@ -51,10 +50,8 @@ public class OrderDAOImpl implements OrderDAO {
             System.err.println("SQLException trong saveOrder: " + e.getMessage());
             e.printStackTrace();
         }
-
-        // Trả về -1 nếu có lỗi xảy ra
         return -1;
-    }
+    }//////////////////////////
 
     @Override
     public void saveOrderItem(OrderItem item) {
@@ -70,7 +67,7 @@ public class OrderDAOImpl implements OrderDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
+    }///////////////////////
 
     @Override
     public Optional<Order> findByTransactionCode(String transactionCode) {
@@ -91,10 +88,10 @@ public class OrderDAOImpl implements OrderDAO {
             e.printStackTrace();
         }
         return Optional.empty();
-    }
+    }//////////////////////
 
     @Override
-    public void updateOrderStatus(int orderId, int statusId) {
+    public boolean updateOrderStatus(int orderId, int statusId) {
         String sql = "UPDATE orders SET status_id = ? WHERE order_id = ?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -104,7 +101,8 @@ public class OrderDAOImpl implements OrderDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
+        return true;
+    }////////////////////////
 
     @Override
     public void updateOrderTransactionCode(int orderId, String transactionCode) {
@@ -117,5 +115,98 @@ public class OrderDAOImpl implements OrderDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }//////////////////////
+
+    @Override
+    public List<Order> getAllOrders() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT o.*, s.name as status_name, pm.name as payment_method_name FROM orders o " +
+                "LEFT JOIN settings s ON o.status_id = s.setting_id " +
+                "LEFT JOIN settings pm ON o.payment_method_id = pm.setting_id " +
+                "WHERE o.is_deleted = 0 ORDER BY o.order_date DESC";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs, false));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return orders;
+    }////////////////////////
+
+    @Override
+    public Order getOrderById(Integer orderId) {
+        String sql = "SELECT o.*, s.name as status_name, pm.name as payment_method_name FROM orders o " +
+                "LEFT JOIN settings s ON o.status_id = s.setting_id " +
+                "LEFT JOIN settings pm ON o.payment_method_id = pm.setting_id " +
+                "WHERE o.order_id = ? AND o.is_deleted = 0";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToOrder(rs, true);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }///////////////////////
+
+    @Override
+    public List<OrderItem> getOrderItemsByOrderId(Integer orderId) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        String sql = "SELECT oi.*, p.product_name, p.image as imageUrl FROM order_items oi JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    OrderItem item = new OrderItem();
+                    item.setOrderItemId(rs.getInt("order_item_id"));
+                    item.setOrderId(rs.getInt("order_id"));
+                    item.setQuantity(rs.getInt("quantity"));
+                    item.setPrice(rs.getLong("price"));
+                    Product product = new Product();
+                    product.setProductId(rs.getInt("product_id"));
+                    product.setProductName(rs.getString("product_name"));
+                    product.setImageUrl(rs.getString("imageUrl"));
+                    item.setProduct(product);
+                    orderItems.add(item);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return orderItems;
+    }/////////////////////////
+
+    // --- PHƯƠNG THỨC TRỢ GIÚP ---
+    private Order mapResultSetToOrder(ResultSet rs, boolean loadItems) throws SQLException {
+        Order order = new Order();
+        order.setOrderId(rs.getInt("order_id"));
+        order.setUserId((Integer) rs.getObject("user_id"));
+        order.setStatusId(rs.getInt("status_id"));
+        order.setPaymentMethodId(rs.getInt("payment_method_id"));
+        order.setEmail(rs.getString("email"));
+        order.setFullName(rs.getString("full_name"));
+        order.setAddress(rs.getString("address"));
+        order.setNote(rs.getString("note"));
+        order.setPhoneNumber(rs.getString("phone_number"));
+        order.setTotalMoney(rs.getLong("total_money"));
+        if (rs.getTimestamp("order_date") != null) {
+            order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
+        }
+        order.setDiscount((Integer) rs.getObject("discount"));
+        order.setTransactionCode(rs.getString("transaction_code"));
+
+        Setting status = new Setting();
+        status.setSettingId(rs.getInt("status_id"));
+        status.setName(rs.getString("status_name"));
+        order.setStatus(status);
+
+        Setting paymentMethod = new Setting();
+        paymentMethod.setSettingId(rs.getInt("payment_method_id"));
+        paymentMethod.setName(rs.getString("payment_method_name"));
+        order.setPaymentMethod(paymentMethod);
+
+        if (loadItems) {
+            order.setOrderItems(getOrderItemsByOrderId(order.getOrderId()));
+        }
+
+        return order;
     }
 }

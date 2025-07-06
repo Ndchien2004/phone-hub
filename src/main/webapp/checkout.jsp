@@ -112,15 +112,23 @@
             text-transform: uppercase;
         }
 
+        /* ---- CẬP NHẬT: STYLE LẠI KHỐI HIỂN THỊ SẢN PHẨM ---- */
+        /* Tìm và thay thế toàn bộ khối CSS cho .product-summary-item bằng khối này */
+
         .product-summary-item {
-            display: flex;
-            align-items: center;
+            display: flex; /* Bật Flexbox để căn chỉnh */
+            align-items: center; /* Căn giữa tất cả các phần tử theo chiều dọc */
             gap: 15px;
             margin-bottom: 15px;
+            padding-bottom: 15px; /* Thêm padding dưới để tạo khoảng cách */
+            border-bottom: 1px solid var(--border-color); /* Thêm đường kẻ phân cách */
         }
 
+        /* Ẩn đường kẻ của sản phẩm cuối cùng để không bị thừa */
         .product-summary-item:last-child {
             margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
         }
 
         .product-summary-item img {
@@ -129,11 +137,19 @@
             object-fit: contain;
             border: 1px solid var(--border-color);
             border-radius: 4px;
+            flex-shrink: 0; /* Ngăn ảnh bị co lại khi tên sản phẩm quá dài */
+        }
+
+        /* Khối tên và giá sản phẩm */
+        .product-summary-info {
+            /* Khối này sẽ tự động chiếm không gian ở giữa */
+            flex-grow: 1;
         }
 
         .product-summary-info .name {
             font-weight: 500;
             margin-bottom: 5px;
+            line-height: 1.4; /* Cải thiện hiển thị nếu tên sản phẩm dài và xuống dòng */
         }
 
         .product-summary-info .price {
@@ -141,8 +157,15 @@
             color: var(--primary-red);
         }
 
+        /* Khối "Số lượng" - Điểm chính của sự thay đổi */
         .product-summary-quantity {
+            /* Đẩy khối này sang hẳn bên phải */
+            margin-left: auto;
+            /* Style lại cho văn bản phụ */
+            font-size: 13px;
             color: var(--subtext-color);
+            flex-shrink: 0; /* Ngăn không bị co lại */
+            padding-left: 15px; /* Thêm khoảng đệm trái để không bị dính vào tên sản phẩm */
         }
 
         .form-row {
@@ -405,10 +428,21 @@
             font-weight: bold;
         }
 
+        /* ----- LOGIC CSS CHO VIỆC CHUYỂN STEP ----- */
+        /* Mặc định (Step 1) */
         #step1-summary-view {
             display: none;
         }
 
+        #payment-method-section {
+            display: none;
+        }
+
+        #step2-button-wrapper {
+            display: none;
+        }
+
+        /* Khi ở Step 2 (thêm class on-step-2 vào form) */
         #checkout-form.on-step-2 #step1-view {
             display: none;
         }
@@ -420,6 +454,16 @@
         #checkout-form.on-step-2 #payment-method-section {
             display: block;
         }
+
+        #checkout-form.on-step-2 #step1-button-wrapper {
+            display: none;
+        }
+
+        #checkout-form.on-step-2 #step2-button-wrapper {
+            display: flex;
+        }
+
+        /* ----- HẾT LOGIC CSS ----- */
 
         .info-summary-card {
             display: flex;
@@ -463,19 +507,201 @@
         .edit-link:hover {
             text-decoration: underline;
         }
+
+        /* ----- CẬP NHẬT CUỐI CÙNG: CSS CHO VOUCHER (Đồng bộ màu đỏ) ----- */
+        /* Thay thế khối CSS voucher cũ bằng khối này */
+        .voucher-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .voucher-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .voucher-input-group input {
+            flex-grow: 1;
+        }
+
+        .btn-apply-voucher {
+            /* THAY ĐỔI: Chuyển sang màu đỏ đồng bộ với web */
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .btn-apply-voucher:hover {
+            opacity: 0.9;
+        }
+
+        .btn-apply-voucher:disabled {
+            /* THAY ĐỔI: Màu khi bị vô hiệu hóa cũng theo tone đỏ */
+            background-color: #f07f89;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .voucher-message {
+            font-size: 13px;
+            margin-top: 8px;
+            min-height: 15px;
+        }
+
+        .voucher-message.success {
+            color: var(--primary-green, #28a745);
+        }
+
+        .voucher-message.error {
+            color: var(--primary-red);
+        }
+
+        /* Giữ nguyên CSS để ẩn/hiện dòng giảm giá */
+        #voucher-discount-row {
+            display: none;
+        }
+
+        /* ----- BỔ SUNG: CSS CHO GIAO DIỆN GIỎ HÀNG TRỐNG ----- */
+
+        /* Định dạng lại container chính khi giỏ hàng trống */
+        .checkout-container.is-empty {
+            justify-content: center; /* Căn giữa nội dung theo chiều ngang */
+            padding-top: 40px; /* Thêm khoảng trống ở trên cho thoáng */
+            padding-bottom: 40px;
+        }
+
+        /* Định dạng lại cột bên trái khi giỏ hàng trống */
+        .checkout-container.is-empty .checkout-left {
+            flex: none; /* Bỏ thuộc tính co giãn */
+            width: 100%;
+            max-width: 550px; /* Giới hạn độ rộng tối đa để không bị bè ngang */
+        }
+
+        /* Style lại phần thông báo giỏ hàng trống */
+        .empty-cart-section {
+            padding: 40px 20px; /* Tăng padding để có nhiều không gian hơn */
+            text-align: center;
+        }
+
+        /* Bổ sung icon giỏ hàng lớn ở trên */
+        .empty-cart-section::before {
+            content: '\f07a'; /* Mã Unicode của icon fa-shopping-cart */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900; /* Cần thiết để icon hiển thị đúng */
+            font-size: 60px;
+            color: #e0e0e0; /* Màu xám nhạt, không quá nổi bật */
+            display: block;
+            margin-bottom: 25px;
+        }
+
+        .empty-cart-section p {
+            font-size: 16px; /* Cho chữ to hơn một chút */
+            color: var(--subtext-color);
+            margin-bottom: 25px;
+        }
+
+        /* Style lại nút cho đẹp hơn trong ngữ cảnh này */
+        .btn-shop-now {
+            display: inline-block;
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-shop-now:hover {
+            opacity: 0.9;
+        }
+
+        /* ---- BỔ SUNG: CHỐNG "NHÁY" TRANG ---- */
+        /* Mặc định ẩn nội dung chính đi */
+        .checkout-container {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        /* Thêm class này bằng JS sau khi đã kiểm tra xong để hiển thị nội dung */
+        .checkout-container.js-loaded {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* ---- BỔ SUNG: CSS cho nút Scroll to Top ---- */
+        #scrollToTopBtn {
+            /* Trạng thái mặc định: ẩn đi */
+            opacity: 0;
+            visibility: hidden;
+
+            /* Vị trí cố định ở góc dưới bên phải */
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+
+            /* Thiết kế nút */
+            background-color: var(--primary-red); /* Dùng màu đỏ chủ đạo của bạn */
+            color: white;
+            border: none;
+            outline: none;
+            cursor: pointer;
+
+            /* Kích thước và hình dạng */
+            width: 45px;
+            height: 45px;
+            border-radius: 50%; /* Bo tròn thành hình tròn */
+
+            /* Căn giữa icon */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+
+            /* Hiệu ứng và bóng đổ */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s, visibility 0.3s, background-color 0.3s;
+        }
+
+        #scrollToTopBtn:hover {
+            background-color: #a70012; /* Màu đỏ sậm hơn khi di chuột qua */
+        }
+
+        /* Class 'show' sẽ được thêm bằng JS để nút hiện ra */
+        #scrollToTopBtn.show {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
 
-<form id="checkout-form" method="post" novalidate>
+<%@ include file="layout/navbar.jsp" %>
+
+<%-- THAY ĐỔI: Thêm class="on-step-2" để mặc định hiển thị ở bước thanh toán --%>
+<form id="checkout-form" method="post" novalidate class="on-step-2">
     <header class="checkout-header">
         <div class="header-main">
             <a href="cart.jsp" class="back-arrow"><i class="fa-solid fa-arrow-left"></i></a>
-            <h1 class="title" id="header-title">Thông tin</h1>
+            <h1 class="title" id="header-title">Thanh toán</h1>
         </div>
         <div class="checkout-steps">
-            <span class="step active" id="step1-indicator">1. THÔNG TIN</span>
-            <span class="step" id="step2-indicator">2. THANH TOÁN</span>
+            <span class="step" id="step1-indicator">1. THÔNG TIN</span>
+            <span class="step active" id="step2-indicator">2. THANH TOÁN</span>
         </div>
     </header>
 
@@ -516,6 +742,7 @@
                     </c:choose>
                 </div>
 
+                <%-- View này chứa form nhập liệu, mặc định sẽ bị ẩn đi --%>
                 <div id="step1-view">
                     <div class="card">
                         <h3 class="card-title">Thông tin khách hàng</h3>
@@ -614,6 +841,7 @@
                     </div>
                 </div>
 
+                <%-- View này hiển thị thông tin tóm tắt, mặc định sẽ hiện ra --%>
                 <div id="step1-summary-view">
                     <div class="card info-summary-card">
                         <div class="info-summary-block">
@@ -640,7 +868,8 @@
                     </div>
                 </div>
 
-                <div class="card" id="payment-method-section" style="display: none;">
+                <%-- Mục thanh toán, mặc định sẽ hiện ra --%>
+                <div class="card" id="payment-method-section">
                     <h3 class="card-title">Phương Thức Thanh Toán</h3>
                     <div class="payment-method-option">
                         <div class="form-check">
@@ -651,13 +880,18 @@
                     </div>
                     <div class="payment-method-option">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="VNPAY">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="payos" value="PAYOS">
                             <label class="form-check-label" for="vnpay">Thanh toán qua mã QR PayOS</label>
+                        </div>
+                    </div>
+                    <div class="payment-method-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="VNPAY">
+                            <label class="form-check-label" for="vnpay">Thanh toán qua VNPAY (Thẻ ATM/Visa/QR)</label>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="checkout-right">
                 <div class="card">
                     <div class="order-summary">
@@ -676,24 +910,43 @@
                             <span class="value" style="color: var(--primary-red);">- <fmt:formatNumber
                                     value="${sessionScope.cart.discount}" type="currency" currencySymbol="₫"/></span>
                         </div>
+                        <div class="summary-row" id="voucher-discount-row">
+                            <span class="label">Giảm giá Voucher</span>
+                            <span class="value" id="voucher-discount-value" style="color: var(--primary-red);"></span>
+                        </div>
+
                         <div class="summary-row total">
-                            <span class="label">Tổng tiền tạm tính</span>
-                            <span class="value"><fmt:formatNumber value="${sessionScope.cart.finalTotal}"
-                                                                  type="currency" currencySymbol="₫"/></span>
+                            <span class="label">Tổng cộng</span>
+                            <span class="value" id="final-total-value"><fmt:formatNumber
+                                    value="${sessionScope.cart.finalTotal}"
+                                    type="currency" currencySymbol="₫"/></span>
                         </div>
                     </div>
+                    <%-- BỔ SUNG: Khu vực nhập voucher --%>
+                    <div class="voucher-section">
+                        <div class="voucher-input-group">
+                            <input type="text" id="voucher-code-input" name="voucher_code"
+                                   placeholder="Nhập mã giảm giá">
+                            <button type="button" class="btn-apply-voucher" id="apply-voucher-btn">Áp dụng</button>
+                        </div>
+                        <div id="voucher-message" class="voucher-message"></div>
+                    </div>
+
                     <div class="checkout-footer">
+                        <%-- Nút cho Step 1 (Chỉnh sửa thông tin) --%>
                         <div id="step1-button-wrapper" class="button-wrapper">
                             <button type="button" id="next-step-btn" class="btn-submit">Tiếp tục</button>
                         </div>
-                        <div id="step2-button-wrapper" class="button-wrapper" style="display: none;">
+                        <%-- Nút cho Step 2 (Thanh toán) --%>
+                        <div id="step2-button-wrapper" class="button-wrapper">
                             <label class="terms-label">
                                 <input type="checkbox" id="terms-checkbox">
                                 <span>Tôi đồng ý với các <a href="dieu-khoan-giao-dich.html" target="_blank">điều khoản và điều kiện giao dịch</a> của cửa hàng.</span>
                             </label>
                             <button type="submit" id="submit-order-btn" class="btn-submit" disabled>Thanh toán</button>
-                            <button type="button" id="back-to-step1-btn" class="btn-secondary">Quay lại</button>
+                            <%--<button type="button" id="back-to-step1-btn" class="btn-secondary">Quay lại</button>--%>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -703,17 +956,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // --- CÁC BIẾN DOM ---
         const checkoutForm = document.getElementById('checkout-form');
-        const step1View = document.getElementById('step1-view');
-        const step1SummaryView = document.getElementById('step1-summary-view');
-        const paymentSection = document.getElementById('payment-method-section');
         const nextStepBtn = document.getElementById('next-step-btn');
-        const backToStep1Btn = document.getElementById('back-to-step1-btn');
+        <%--const backToStep1Btn = document.getElementById('back-to-step1-btn');--%>
         const headerTitle = document.getElementById('header-title');
         const step1Indicator = document.getElementById('step1-indicator');
         const step2Indicator = document.getElementById('step2-indicator');
-        const step1ButtonWrapper = document.getElementById('step1-button-wrapper');
-        const step2ButtonWrapper = document.getElementById('step2-button-wrapper');
         const termsCheckbox = document.getElementById('terms-checkbox');
         const submitBtn = document.getElementById('submit-order-btn');
         const recipientName = document.getElementById('recipientName');
@@ -733,6 +982,104 @@
         const editShippingInfo = document.getElementById('edit-shipping-info');
         const cartIsEmpty = !(${not empty sessionScope.cart and not empty sessionScope.cart.items});
 
+
+        const voucherInput = document.getElementById('voucher-code-input');
+        const applyVoucherBtn = document.getElementById('apply-voucher-btn');
+        const voucherMessage = document.getElementById('voucher-message');
+        const voucherDiscountRow = document.getElementById('voucher-discount-row');
+        const voucherDiscountValue = document.getElementById('voucher-discount-value');
+        const finalTotalValue = document.getElementById('final-total-value');
+
+        const checkoutContainer = document.querySelector('.checkout-container');
+
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+        // Hàm kiểm tra vị trí cuộn để hiện/ẩn nút
+        function scrollFunction() {
+            // Hiện nút nếu người dùng cuộn xuống hơn 200px
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+        }
+
+// Hàm xử lý việc cuộn lên đầu trang một cách mượt mà
+        function backToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // Hiệu ứng cuộn mượt
+            });
+        }
+
+// Gán sự kiện scroll cho cửa sổ trình duyệt
+        window.onscroll = function () {
+            scrollFunction();
+        };
+
+        // BỔ SUNG: Hàm xử lý áp dụng voucher
+        function handleApplyVoucher() {
+            const code = voucherInput.value.trim().toUpperCase();
+            if (!code) {
+                voucherMessage.textContent = 'Vui lòng nhập mã voucher.';
+                voucherMessage.className = 'voucher-message error';
+                return;
+            }
+
+            applyVoucherBtn.disabled = true;
+            applyVoucherBtn.textContent = 'Đang...';
+            voucherMessage.textContent = '';
+
+            // --- LOGIC GỌI BACKEND ---
+            // Bạn cần tạo một Servlet (ví dụ: /apply-voucher) để xử lý logic này.
+            // Servlet nhận mã voucher, kiểm tra và trả về JSON.
+
+            const formData = new FormData(checkoutForm);
+            // formData.append('voucherCode', code); // name="voucher_code" đã có trong form
+
+            // Thay 'apply-voucher-url' bằng URL thực tế của bạn
+            fetch('apply-voucher-url', {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        // Thử parse lỗi từ JSON backend trả về
+                        return response.json().then(err => {
+                            throw new Error(err.message || 'Mã voucher không hợp lệ hoặc đã hết hạn')
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Backend cần trả về JSON có cấu trúc như sau khi thành công:
+                    // { success: true, discountAmount: 50000, newFinalTotal: 29450000, message: "Áp dụng thành công!" }
+                    if (data.success) {
+                        voucherMessage.textContent = data.message;
+                        voucherMessage.className = 'voucher-message success';
+
+                        voucherDiscountRow.style.display = 'flex'; // Hiện dòng giảm giá
+                        voucherDiscountValue.textContent = `- ${formatter.format(data.discountAmount)}`;
+                        finalTotalValue.textContent = formatter.format(data.newFinalTotal);
+
+                        voucherInput.disabled = true; // Vô hiệu hóa input sau khi áp dụng
+                        applyVoucherBtn.textContent = 'Đã áp dụng';
+                    } else {
+                        throw new Error(data.message || 'Mã voucher không hợp lệ');
+                    }
+                })
+                .catch(error => {
+                    voucherMessage.textContent = error.message;
+                    voucherMessage.className = 'voucher-message error';
+                    applyVoucherBtn.disabled = false;
+                    applyVoucherBtn.textContent = 'Áp dụng';
+                });
+        }
+
+// BỔ SUNG: Helper để format tiền tệ
+        const formatter = new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'});
+
+        // --- CÁC HÀM VALIDATE ---
         const showError = (input, message) => {
             input.classList.add('is-invalid');
             const errorDiv = document.getElementById(input.id + 'Error');
@@ -798,6 +1145,62 @@
             return true;
         };
 
+        // --- LOGIC CHÍNH ĐÃ SỬA ---
+
+        /**
+         * Kiểm tra "âm thầm" xem tất cả thông tin có hợp lệ hay không.
+         * Không hiển thị lỗi ra giao diện, chỉ trả về true/false.
+         */
+        function isAllInformationValid() {
+            const isNameOk = /^[\p{L}\s]{2,50}$/u.test(recipientName.value.trim());
+            const isPhoneOk = /^0\d{9}$/.test(recipientPhone.value.trim());
+            const isEmailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.value.trim());
+            const isAddressOk = shippingAddress.value.trim() !== '';
+            const isCityOk = shippingCity.value.trim() !== '';
+            const isDistrictOk = shippingDistrict.value.trim() !== '';
+            const isWardOk = shippingWard.value.trim() !== '';
+
+            return isNameOk && isPhoneOk && isEmailOk && isAddressOk && isCityOk && isDistrictOk && isWardOk;
+        }
+
+        /**
+         * Hàm trung tâm để quản lý trạng thái của nút "Thanh toán".
+         */
+        function updateSubmitButtonState() {
+            const infoValid = isAllInformationValid();
+            const termsChecked = termsCheckbox.checked;
+            submitBtn.disabled = !(infoValid && termsChecked);
+        }
+
+        // Cập nhật thông tin tóm tắt
+        function updateSummaryView() {
+            summaryName.textContent = recipientName.value || 'Chưa có thông tin';
+            summaryPhone.textContent = recipientPhone.value || 'Chưa có thông tin';
+            summaryEmail.textContent = recipientEmail.value || 'Chưa có thông tin';
+
+            const addressParts = [
+                shippingAddress.value,
+                shippingWard.value ? shippingWard.options[shippingWard.selectedIndex].text : '',
+                shippingDistrict.value ? shippingDistrict.options[shippingDistrict.selectedIndex].text : '',
+                shippingCity.value ? shippingCity.options[shippingCity.selectedIndex].text : ''
+            ].filter(part => part && part.trim() !== '' && part.trim() !== '-- Chọn Phường/Xã --' && part.trim() !== '-- Chọn Quận/Huyện --' && part.trim() !== '-- Chọn Tỉnh/Thành phố --');
+
+            if (addressParts.length > 0) {
+                summaryAddress.textContent = addressParts.join(', ');
+            } else {
+                summaryAddress.textContent = 'Chưa có thông tin';
+            }
+
+
+            if (note.value.trim()) {
+                summaryNote.textContent = `Ghi chú: ${note.value.trim()}`;
+                summaryNote.style.display = 'block';
+            } else {
+                summaryNote.style.display = 'none';
+            }
+        }
+
+        // Chuyển sang màn hình Step 2 (Thanh toán)
         function goToStep2() {
             const isNameValid = validateName();
             const isPhoneValid = validatePhone();
@@ -816,59 +1219,48 @@
                 return;
             }
 
-            summaryName.textContent = recipientName.value;
-            summaryPhone.textContent = recipientPhone.value;
-            summaryEmail.textContent = recipientEmail.value;
-
-            const addressParts = [
-                shippingAddress.value,
-                shippingWard.value ? shippingWard.options[shippingWard.selectedIndex].text : '',
-                shippingDistrict.value ? shippingDistrict.options[shippingDistrict.selectedIndex].text : '',
-                shippingCity.value ? shippingCity.options[shippingCity.selectedIndex].text : ''
-            ].filter(part => part && part.trim() !== '');
-
-            const fullAddress = addressParts.join(', ');
-            summaryAddress.textContent = fullAddress;
-
-            if (note.value.trim()) {
-                summaryNote.textContent = `Ghi chú: ${note.value.trim()}`;
-                summaryNote.style.display = 'block';
-            } else {
-                summaryNote.style.display = 'none';
-            }
+            updateSummaryView();
 
             checkoutForm.classList.add('on-step-2');
-            document.getElementById('payment-method-section').style.display = 'block';
-            step1ButtonWrapper.style.display = 'none';
-            step2ButtonWrapper.style.display = 'flex';
             headerTitle.textContent = 'Thanh toán';
             step1Indicator.classList.remove('active');
             step2Indicator.classList.add('active');
             window.scrollTo({top: 0, behavior: 'smooth'});
+
+            // Sau khi quay lại Step 2 thành công, kiểm tra lại trạng thái nút submit.
+            updateSubmitButtonState();
         }
 
+        // Quay về màn hình Step 1 (Chỉnh sửa thông tin)
         function goToStep1() {
             checkoutForm.classList.remove('on-step-2');
-            document.getElementById('payment-method-section').style.display = 'none';
-            step2ButtonWrapper.style.display = 'none';
-            step1ButtonWrapper.style.display = 'flex';
             headerTitle.textContent = 'Thông tin';
             step2Indicator.classList.remove('active');
             step1Indicator.classList.add('active');
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
+        // Xử lý khi submit form
         function handleFormSubmit(event) {
             event.preventDefault();
+
+            // Kiểm tra lần cuối cùng trước khi gửi
+            if (!isAllInformationValid() || !termsCheckbox.checked) {
+                // Hiển thị thông báo nếu người dùng cố tình submit khi nút bị vô hiệu hóa (ví dụ: qua console)
+                alert('Vui lòng cung cấp đầy đủ thông tin và đồng ý với điều khoản giao dịch.');
+                return;
+            }
+
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span></span> Đang xử lý...';
+
             setTimeout(() => {
                 const formData = new FormData(checkoutForm);
                 const paymentMethod = formData.get('paymentMethod');
                 if (paymentMethod === 'COD') {
                     checkoutForm.action = 'checkout';
                     checkoutForm.submit();
-                } else if (paymentMethod === 'VNPAY') {
+                } else if (paymentMethod === 'PAYOS') {
                     fetch('create-link', {
                         method: 'POST',
                         body: new URLSearchParams(formData)
@@ -889,6 +1281,30 @@
                         .catch(error => {
                             console.error('Fetch Error:', error);
                             alert('Lỗi: ' + error.message);
+                            submitBtn.disabled = !termsCheckbox.checked;
+                            submitBtn.innerHTML = 'Thanh toán';
+                        });
+                } else if (paymentMethod === 'VNPAY') {
+                    fetch('create-vnpay-link', {
+                        method: 'POST',
+                        body: new URLSearchParams(formData)
+                    })
+                        .then(response => {
+                            if (!response.ok) return response.json().then(err => {
+                                throw new Error(err.error || 'Lỗi server')
+                            });
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data && data.paymentUrl) {
+                                window.location.href = data.paymentUrl;
+                            } else {
+                                throw new Error('Không nhận được link thanh toán VNPAY.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi tạo link VNPAY:', error);
+                            alert('Lỗi: ' + error.message);
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = 'Thanh toán';
                         });
@@ -896,21 +1312,57 @@
             }, 100);
         }
 
+        // --- GÁN SỰ KIỆN ---
+
+        scrollToTopBtn.addEventListener('click', backToTop);
+
+        // BỔ SUNG: Gán sự kiện cho nút voucher
+        if (applyVoucherBtn) applyVoucherBtn.addEventListener('click', handleApplyVoucher);
+
         if (nextStepBtn) nextStepBtn.addEventListener('click', goToStep2);
-        if (backToStep1Btn) backToStep1Btn.addEventListener('click', goToStep1);
+        // if (backToStep1Btn) backToStep1Btn.addEventListener('click', goToStep1);
         if (editCustomerInfo) editCustomerInfo.addEventListener('click', goToStep1);
         if (editShippingInfo) editShippingInfo.addEventListener('click', goToStep1);
 
         if (checkoutForm) checkoutForm.addEventListener('submit', handleFormSubmit);
-        if (termsCheckbox) termsCheckbox.addEventListener('change', function () {
-            submitBtn.disabled = !this.checked;
-        });
 
-        if (cartIsEmpty) {
-            if (step1ButtonWrapper) step1ButtonWrapper.style.display = 'none';
-            if (step1View) step1View.style.display = 'none';
+        // Khi checkbox thay đổi, gọi hàm kiểm tra tổng hợp.
+        if (termsCheckbox) {
+            termsCheckbox.addEventListener('change', updateSubmitButtonState);
         }
 
+        if (cartIsEmpty) {
+            const checkoutRightColumn = document.querySelector('.checkout-right');
+
+            // Thêm class 'is-empty' để kích hoạt CSS cho giao diện giỏ hàng trống
+            if (checkoutContainer) {
+                checkoutContainer.classList.add('is-empty');
+            }
+
+            // Ẩn cột bên phải đi
+            if (checkoutRightColumn) {
+                checkoutRightColumn.style.display = 'none';
+            }
+
+            // Ẩn các thành phần không cần thiết khác
+            if (document.getElementById('step1-view')) document.getElementById('step1-view').style.display = 'none';
+            if (document.getElementById('step1-summary-view')) document.getElementById('step1-summary-view').style.display = 'none';
+            if (document.getElementById('payment-method-section')) document.getElementById('payment-method-section').style.display = 'none';
+        } else {
+            // Nếu giỏ hàng KHÔNG trống, thì chỉ cần chạy logic khởi tạo ban đầu
+            // (Trong trường hợp của bạn, bạn muốn nó ở Step 2, nên logic này đảm bảo nó hoạt động đúng)
+            updateSummaryView();
+            updateSubmitButtonState();
+        }
+
+// BƯỚC CUỐI CÙNG VÀ QUAN TRỌNG NHẤT:
+// Sau khi tất cả logic kiểm tra (if/else) đã hoàn tất,
+// thêm class 'js-loaded' để hiển thị nội dung ra màn hình.
+        if (checkoutContainer) {
+            checkoutContainer.classList.add('js-loaded');
+        }
+
+        // Gán sự kiện validate khi người dùng rời khỏi ô input
         recipientName.addEventListener('blur', validateName);
         recipientPhone.addEventListener('blur', validatePhone);
         recipientEmail.addEventListener('blur', validateEmail);
@@ -918,8 +1370,21 @@
         shippingCity.addEventListener('change', () => validateRequiredField(shippingCity, 'Vui lòng chọn Tỉnh/Thành phố.'));
         shippingDistrict.addEventListener('change', () => validateRequiredField(shippingDistrict, 'Vui lòng chọn Quận/Huyện.'));
         shippingWard.addEventListener('change', () => validateRequiredField(shippingWard, 'Vui lòng chọn Phường/Xã.'));
+
+        // --- KHỞI TẠO BAN ĐẦU ---
+
+        // Cập nhật thông tin tóm tắt ngay khi tải trang
+        updateSummaryView();
+
+        // Ngay khi trang tải xong, gọi hàm kiểm tra tổng hợp để đặt trạng thái ban đầu cho nút "Thanh toán".
+        updateSubmitButtonState();
     });
 </script>
+
+<!-- BỔ SUNG: Nút Scroll back to top -->
+<button id="scrollToTopBtn" title="Lên đầu trang">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
 
 </body>
 </html>
