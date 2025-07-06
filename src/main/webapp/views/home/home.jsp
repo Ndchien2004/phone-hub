@@ -61,14 +61,14 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
     <div class="container-fluid">
         <!-- Logo -->
-        <a class="navbar-brand fw-bold" href="#">PhoneStore</a>
+        <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/home">PhoneStore</a>
 
         <!-- Right side items -->
         <div class="d-flex align-items-center">
 
             <!-- Cart Icon -->
             <div class="position-relative me-3">
-                <a href="../cart/cart.jsp">
+                <a href="${pageContext.request.contextPath}/cart">
                     <i class="fas fa-shopping-cart fa-lg text-primary"></i>
                     <span class="cart-badge" id="cartCount">
                         ${sessionScope.cartCount != null ? sessionScope.cartCount : 0}
