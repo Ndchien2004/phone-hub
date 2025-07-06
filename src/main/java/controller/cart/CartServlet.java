@@ -95,7 +95,7 @@ public class CartServlet extends HttpServlet {
 
         request.setAttribute("cart", cart);
 
-        request.getRequestDispatcher("cart.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/cart/cart.jsp").forward(request, response);
     }
 
     @Override

@@ -81,6 +81,6 @@ public class SearchServlet extends HttpServlet {
         request.setAttribute("minPrice", min != null ? min.toPlainString() : "");
         request.setAttribute("maxPrice", max != null ? max.toPlainString() : "");
         request.setAttribute("selectedCategories", categoryParams);
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/home/home.jsp").forward(request, response);
     }
 }

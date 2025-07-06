@@ -36,6 +36,6 @@ public class HomeServlet extends HttpServlet {
 
         request.setAttribute("pageResult", pageResult);
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/home/home.jsp").forward(request, response);
     }
 }
