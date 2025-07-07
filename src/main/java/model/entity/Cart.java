@@ -34,6 +34,13 @@ public class Cart {
         calculateTotals(); // Cập nhật lại tổng tiền
     }
 
+    //Get Total Items in Cart
+    public int getTotalQuantity() {
+        return items.stream()
+                .mapToInt(CartItem::getQuantity)
+                .sum();
+    }
+
     // PHƯƠNG THỨC MỚI ĐỂ TÍNH TOÁN TẤT CẢ CÁC LOẠI TỔNG TIỀN
     public void calculateTotals() {
         this.rawTotal = 0;
