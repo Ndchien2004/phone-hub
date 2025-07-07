@@ -34,7 +34,7 @@ public class SetupCartServlet extends HttpServlet {
             System.out.println("Đã tạo một giỏ hàng mới.");
 
             // BƯỚC 2: BỔ SUNG - Dùng vòng lặp để lấy sản phẩm từ ID 1 đến 9
-            for (int productId = 1; productId <= 11; productId++) {
+            for (int productId = 1; productId <= 2; productId++) {
                 // Gọi ProductService để lấy thông tin sản phẩm
                 Optional<Product> productOptional = productService.getProductById(productId);
 

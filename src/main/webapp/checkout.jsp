@@ -776,7 +776,7 @@
                             <div>
                                 <input type="checkbox" id="promo-email" name="promo-email">
                                 <label for="promo-email" style="cursor:pointer;">Nhận email thông báo và ưu đãi từ
-                                    CellphoneS</label>
+                                    PhoneHub</label>
                             </div>
                         </div>
                     </div>
