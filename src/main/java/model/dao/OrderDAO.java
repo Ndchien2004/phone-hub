@@ -14,4 +14,6 @@ public interface OrderDAO {
     Order getOrderById(Integer orderId);
     List<OrderItem> getOrderItemsByOrderId(Integer orderId);
     boolean updateOrderStatus(int orderId, int statusId);
+    boolean cancelOrder(Integer orderId);
+    boolean canCancelOrder(Integer orderId);
 }

@@ -9,6 +9,7 @@ public class CartItem {
     private long price;
     private boolean isDeleted;
     private Product product; // Để truy cập thông tin sản phẩm
+    private Order order;
 
     public int getCartItemId() {
         return cartItemId;
@@ -65,4 +66,8 @@ public class CartItem {
     public void setProduct(Product product) {
         this.product = product;
     }
+
+    public Order getOrder() { return order; }
+
+    public void setOrder(Order order) { this.order = order; }
 }

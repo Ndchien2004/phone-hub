@@ -102,7 +102,76 @@ public class OrderDAOImpl implements OrderDAO {
             e.printStackTrace();
         }
         return true;
-    }////////////////////////
+    }
+
+    @Override
+    public boolean cancelOrder(Integer orderId) {
+        String sql = """
+        UPDATE orders 
+        SET status_id = (
+            SELECT TOP 1 setting_id 
+            FROM settings 
+            WHERE setting_type = 'order_status' 
+            AND (name = 'cancelled' OR description LIKE '%hủy%' OR description LIKE '%Hủy%')
+        )
+        WHERE order_id = ? 
+        AND status_id IN (
+            SELECT setting_id 
+            FROM settings 
+            WHERE setting_type = 'order_status' 
+            AND (name IN ('pending', 'processing') 
+                 OR description LIKE '%chờ%' 
+                 OR description LIKE '%Chờ%'
+                 OR description LIKE '%xử lý%'
+                 OR description LIKE '%Xử lý%')
+        )
+        """;
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            int rowsAffected = ps.executeUpdate();
+
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean canCancelOrder(Integer orderId) {
+        String sql = """
+        SELECT COUNT(*) as can_cancel
+        FROM orders o
+        LEFT JOIN settings s ON o.status_id = s.setting_id AND s.setting_type = 'order_status'
+        WHERE o.order_id = ? 
+        AND o.is_deleted = 0
+        AND (s.name IN ('pending', 'processing') 
+             OR s.description LIKE '%chờ%' 
+             OR s.description LIKE '%Chờ%'
+             OR s.description LIKE '%xử lý%'
+             OR s.description LIKE '%Xử lý%')
+        """;
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("can_cancel") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    ////////////////////////
 
     @Override
     public void updateOrderTransactionCode(int orderId, String transactionCode) {
@@ -148,12 +217,17 @@ public class OrderDAOImpl implements OrderDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }///////////////////////
-
+    ///
     @Override
     public List<OrderItem> getOrderItemsByOrderId(Integer orderId) {
         List<OrderItem> orderItems = new ArrayList<>();
-        String sql = "SELECT oi.*, p.product_name, p.image as imageUrl FROM order_items oi JOIN products p ON oi.product_id = p.product_id WHERE oi.order_id = ?";
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "SELECT oi.*, p.product_name, p.image as imageUrl, p.color, p.memory, p.brief_info, p.price_sale, p.price_origin " +
+                "FROM order_items oi " +
+                "JOIN products p ON oi.product_id = p.product_id " +
+                "WHERE oi.order_id = ? AND oi.is_deleted = 0";
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -162,15 +236,24 @@ public class OrderDAOImpl implements OrderDAO {
                     item.setOrderId(rs.getInt("order_id"));
                     item.setQuantity(rs.getInt("quantity"));
                     item.setPrice(rs.getLong("price"));
+
                     Product product = new Product();
                     product.setProductId(rs.getInt("product_id"));
                     product.setProductName(rs.getString("product_name"));
                     product.setImageUrl(rs.getString("imageUrl"));
+                    product.setColor(rs.getString("color"));
+                    product.setMemory(rs.getString("memory"));
+                    product.setBriefInfo(rs.getString("brief_info"));
+                    product.setPriceSale(rs.getLong("price_sale"));
+                    product.setPriceOrigin(rs.getLong("price_origin"));
+
                     item.setProduct(product);
                     orderItems.add(item);
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return orderItems;
     }/////////////////////////
 

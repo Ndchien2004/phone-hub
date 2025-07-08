@@ -162,4 +162,12 @@ public class Order {
         }
         return "";
     }
+
+    public String getFormattedOrderDateShort() {
+        if (orderDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            return orderDate.format(formatter);
+        }
+        return "";
+    }
 }
