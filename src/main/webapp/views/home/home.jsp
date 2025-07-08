@@ -40,6 +40,8 @@
             min-height: calc(100vh - 56px);
         }
 
+        /* CSS cho cart-badge đã có trong file navbar.jsp nên có thể không cần ở đây nữa,
+           nhưng để lại cũng không sao */
         .cart-badge {
             position: absolute;
             top: -8px;
@@ -57,30 +59,8 @@
     </style>
 </head>
 <body>
-<!-- Header Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-    <div class="container-fluid">
-        <!-- Logo -->
-        <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/home">PhoneStore</a>
 
-        <!-- Right side items -->
-        <div class="d-flex align-items-center">
-
-            <!-- Cart Icon -->
-            <div class="position-relative me-3">
-                <a href="${pageContext.request.contextPath}/cart">
-                    <i class="fas fa-shopping-cart fa-lg text-primary"></i>
-                    <span class="cart-badge" id="cartCount">
-                        ${sessionScope.cartCount != null ? sessionScope.cartCount : 0}
-                    </span>
-                </a>
-            </div>
-
-            <!-- Register Button -->
-            <button class="btn btn-outline-primary">Đăng ký</button>
-        </div>
-    </div>
-</nav>
+<%@ include file="../layout/navbar.jsp" %>
 
 <div class="container">
     <div class="row">
@@ -155,23 +135,6 @@
             <!-- Products Grid -->
             <div class="row g-4" id="productsContainer">
 
-                <!--Test truc tiep du lieu lay duoc-->
-                <%--<c:forEach var="product" items="${sessionScope.cart.items}">
-                    Cart Item:
-                    ${product}<br>
-                </c:forEach>--%>
-<%--                <p>minPrice = '${minPrice}', maxPrice = '${maxPrice}'</p>--%>
-                <%--<p>Hiện có: ${fn:length(pageResult.content)} sản phẩm</p>
-                <c:forEach var="product" items="${pageResult.content}">
-                    ${product}<br>
-                </c:forEach>--%>
-                <%--<c:forEach var="category" items="${categories}">
-                    ${category.name}
-                </c:forEach>--%>
-                <%--<c:forEach var="category" items="${selectedCategories}">
-                    ${category}<br>
-                </c:forEach>--%>
-
                 <!-- Product Card -->
                 <c:forEach var="product" items="${pageResult.content}">
                     <div class="col-lg-3 col-md-4 col-sm-6">
@@ -193,7 +156,7 @@
                                     </div>
                                 </div>
 
-                                <%--Add to Cart Button--%>
+                                    <%--Add to Cart Button--%>
                                 <div class="mt-auto">
                                     <form action="${pageContext.request.contextPath}/add-to-cart" method="get">
                                         <input type="hidden" name="productId" value="${product.id}">
@@ -234,7 +197,7 @@
 
                         <!-- Previous -->
                         <li class="page-item ${pageResult.currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage - 1}">&laquo;</a>
+                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage - 1}">«</a>
                         </li>
 
                         <!-- Page Numbers -->
@@ -246,7 +209,7 @@
 
                         <!-- Next -->
                         <li class="page-item ${pageResult.currentPage == pageResult.totalPages ? 'disabled' : ''}">
-                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage + 1}">&raquo;</a>
+                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage + 1}">»</a>
                         </li>
 
                     </ul>
