@@ -5,8 +5,10 @@ import model.entity.Order;
 import model.entity.District;
 import model.entity.Province;
 import model.entity.Ward;
+import service.EmailService;
 import service.LocationService;
 import service.OrderService;
+import service.impl.EmailServiceImpl;
 import service.impl.LocationServiceImpl;
 import service.impl.OrderServiceImpl;
 import jakarta.servlet.ServletException;
@@ -22,6 +24,7 @@ import java.util.List;
 public class CheckoutServlet extends HttpServlet {
     private final LocationService locationService = new LocationServiceImpl();
     private final OrderService orderService = new OrderServiceImpl();
+    private final EmailService emailService = new EmailServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -68,6 +71,8 @@ public class CheckoutServlet extends HttpServlet {
         String note = req.getParameter("note");
         String fullAddress = String.join(", ", shippingAddress, shippingWard, shippingDistrict, shippingCity);
 
+        String sendPromoEmail = req.getParameter("promo-email");
+
         try {
             // TRUYỀN THAM SỐ "COD" VÀO ĐÂY
             Order order = orderService.createOrderFromGuestCart(cart, name, email, phone, fullAddress, note, "COD");
@@ -79,6 +84,22 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             System.out.println("Đã tạo đơn hàng COD thành công với ID: " + order.getOrderId());
+            // === LOGIC GỬI MAIL ===
+            // Chỉ gửi mail nếu người dùng đã check vào ô đồng ý
+            if (sendPromoEmail != null && sendPromoEmail.equals("on")) {
+                try {
+                    // Gọi service để gửi mail, truyền vào đối tượng order và email người nhận
+                    emailService.sendOrderConfirmationEmail(order, email);
+                } catch (Exception e) {
+                    // Nếu gửi mail lỗi, chỉ in ra log và không làm ảnh hưởng đến luồng chính
+                    System.err.println("Gửi mail xác nhận cho đơn hàng " + order.getOrderId() + " thất bại.");
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Người dùng không chọn nhận email xác nhận.");
+            }
+            // ========================
+
             session.removeAttribute("cart");
             req.setAttribute("order", order);
             req.getRequestDispatcher("/order-confirmation.jsp").forward(req, resp);

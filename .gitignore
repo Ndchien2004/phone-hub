@@ -34,3 +34,6 @@ build/
 .DS_Store
 
 src/main/java/model/dao/DBContext.java
+
+# Ignore the actual mail properties file, only commit the example
+/src/main/resources/mail.properties

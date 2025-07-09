@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận đơn hàng</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .header { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { color: #d70018; margin: 0; }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>PhoneHub</h1>
+        <p>Cảm ơn bạn đã mua hàng!</p>
+    </div>
+
+    <p>Chào <strong>{{customerName}}</strong>,</p>
+    <p>PhoneHub xác nhận đã nhận được đơn hàng của bạn. Chúng tôi sẽ xử lý và giao hàng cho bạn trong thời gian sớm nhất.</p>
+
+    <h3>Chi tiết đơn hàng</h3>
+    <ul>
+        <li><strong>Mã đơn hàng:</strong> #{{orderId}}</li>
+        <li><strong>Ngày đặt:</strong> {{orderDate}}</li>
+        <li><strong>Địa chỉ giao hàng:</strong> {{shippingAddress}}</li>
+        <li><strong>Phương thức thanh toán:</strong> {{paymentMethod}}</li>
+    </ul>
+
+    <h3>Sản phẩm đã đặt</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th style="text-align: right;">Giá</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{itemsTable}}
+        </tbody>
+    </table>
+
+    <h3 style="text-align: right; margin-top: 20px;">
+        Tổng cộng: <span style="color: #d70018;">{{totalAmount}}</span>
+    </h3>
+
+    <div class="footer">
+        <p>Đây là email tự động, vui lòng không trả lời. Mọi thắc mắc xin liên hệ hotline 1800.2097.</p>
+        <p>© 2024 PhoneHub. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
