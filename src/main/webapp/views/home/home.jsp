@@ -191,31 +191,17 @@
                                     <div class="discount-badge">Giảm <fmt:formatNumber value="${discountPercent}" maxFractionDigits="0"/>%</div>
                                 </c:if>
                                 <div class="installment-badge">Trả góp 0%</div>
-
-                                    <%-- Link vào ảnh để xem chi tiết --%>
-                                <a href="product-detail?id=${product.id}">
-                                    <img src="${product.imageUrl}.jpg" alt="${product.name}" class="product-card-img">
-                                </a>
-
-                                    <%-- Nút thêm vào giỏ hàng được đặt ở góc --%>
+                                <a href="product-detail?id=${product.id}"><img src="${product.imageUrl}.jpg" alt="${product.name}" class="product-card-img"></a>
                                 <form action="${pageContext.request.contextPath}/add-to-cart" method="get" style="display: inline;">
-                                    <input type="hidden" name="productId" value="${product.id}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <input type="hidden" name="price" value="${product.priceSale}">
-                                    <button type="submit" class="add-to-cart-btn" title="Thêm vào giỏ hàng">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
+                                    <input type="hidden" name="productId" value="${product.id}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="price" value="${product.priceSale}">
+                                    <button type="submit" class="add-to-cart-btn" title="Thêm vào giỏ hàng"><i class="fas fa-cart-plus"></i></button>
                                 </form>
                             </div>
                             <div class="card-body">
-                                <a href="product-detail?id=${product.id}" class="product-title-link">
-                                    <h3 class="product-title">${product.name}</h3>
-                                </a>
+                                <a href="product-detail?id=${product.id}" class="product-title-link"><h3 class="product-title">${product.name}</h3></a>
                                 <div class="price-block">
                                     <span class="price-sale"><fmt:formatNumber value="${product.priceSale}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ</span>
-                                    <c:if test="${product.priceOrigin > product.priceSale}">
-                                        <span class="price-original"><fmt:formatNumber value="${product.priceOrigin}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ</span>
-                                    </c:if>
+                                    <c:if test="${product.priceOrigin > product.priceSale}"><span class="price-original"><fmt:formatNumber value="${product.priceOrigin}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ</span></c:if>
                                 </div>
                                 <div class="promo-info">Không phí chuyển đổi khi trả góp 0%...</div>
                                 <div class="card-footer-actions">
@@ -227,15 +213,53 @@
                     </div>
                 </c:forEach>
             </div>
-            <%-- Pagination giữ nguyên --%>
+
+            <!-- ======================= KHỐI PHÂN TRANG ĐÃ ĐƯỢC NÂNG CẤP ======================= -->
+            <!-- Bước 1: Xây dựng URL cơ sở DỰA TRÊN LOẠI TRANG -->
+            <c:choose>
+                <%-- Nếu đây là trang chủ (do HomeServlet đặt pageType='home') --%>
+                <c:when test="${pageType == 'home'}">
+                    <c:set var="baseUrl" value="${pageContext.request.contextPath}/home?"/>
+                </c:when>
+                <%-- Ngược lại, đây là trang tìm kiếm (do SearchServlet không đặt pageType) --%>
+                <c:otherwise>
+                    <c:set var="baseUrl" value="${pageContext.request.contextPath}/search?keyword=${keyword}"/>
+                    <c:forEach var="cat" items="${selectedCategories}"><c:set var="baseUrl"
+                                                                              value="${baseUrl}&category=${cat}"/></c:forEach>
+                    <c:if test="${not empty minPrice}"><c:set var="baseUrl" value="${baseUrl}&minPrice=${minPrice}"/></c:if>
+                    <c:if test="${not empty maxPrice}"><c:set var="baseUrl" value="${baseUrl}&maxPrice=${maxPrice}"/></c:if>
+                    <c:if test="${not empty sortBy}"><c:set var="baseUrl" value="${baseUrl}&sortBy=${sortBy}"/></c:if>
+                </c:otherwise>
+            </c:choose>
+
+            <!-- Bước 2: Hiển thị các nút phân trang nếu có nhiều hơn 1 trang -->
+            <c:if test="${pageResult.totalPages > 1}">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-5">
+                        <!-- Nút Previous -->
+                        <li class="page-item ${pageResult.currentPage == 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage - 1}" aria-label="Previous">
+                                <span aria-hidden="true">«</span>
+                            </a>
+                        </li>
+                        <!-- Các nút số trang -->
+                        <c:forEach var="i" begin="1" end="${pageResult.totalPages}">
+                            <li class="page-item ${pageResult.currentPage == i ? 'active' : ''}">
+                                <a class="page-link" href="${baseUrl}&page=${i}">${i}</a>
+                            </li>
+                        </c:forEach>
+                        <!-- Nút Next -->
+                        <li class="page-item ${pageResult.currentPage == pageResult.totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage + 1}" aria-label="Next">
+                                <span aria-hidden="true">»</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </c:if>
         </main>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<%-- Script giữ nguyên --%>
-</body>
-</html>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>

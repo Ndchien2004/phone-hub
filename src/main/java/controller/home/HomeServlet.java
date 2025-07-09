@@ -24,11 +24,16 @@ public class HomeServlet extends HttpServlet {
             throws ServletException, IOException {
 
         int page = 1;
-        int size = 8;
+        final int size = 8; // Đã đúng, mỗi trang 8 sản phẩm
 
         try {
-            page = Integer.parseInt(request.getParameter("page"));
+            // Lấy số trang từ URL, nếu không có thì mặc định là 1
+            String pageParam = request.getParameter("page");
+            if (pageParam != null) {
+                page = Integer.parseInt(pageParam);
+            }
         } catch (NumberFormatException ignored) {
+            // Giữ nguyên page = 1 nếu tham số page không hợp lệ
         }
 
         PageResult<ProductDTO> pageResult = homeService.getAllProducts(page, size);
@@ -36,6 +41,12 @@ public class HomeServlet extends HttpServlet {
 
         request.setAttribute("pageResult", pageResult);
         request.setAttribute("categories", categories);
+
+        // ======================= DÒNG CẦN THÊM =======================
+        // Đặt một thuộc tính để JSP biết đây là trang chủ
+        request.setAttribute("pageType", "home");
+        // =============================================================
+
         request.getRequestDispatcher("/views/home/home.jsp").forward(request, response);
     }
 }
