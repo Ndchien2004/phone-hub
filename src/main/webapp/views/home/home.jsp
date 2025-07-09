@@ -27,15 +27,23 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-        /* === BỐ CỤC CHUNG === */
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        .main-content { padding: 20px; }
-        .section-title { font-size: 24px; font-weight: bold; color: var(--cps-text-dark); text-transform: uppercase; margin-bottom: 20px; }
 
-        /* === CẢI TIẾN SIDEBAR BỘ LỌC === */
+        .main-content {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--cps-text-dark);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
         .sidebar {
             background-color: #fff;
             border: 1px solid var(--cps-border);
@@ -43,22 +51,24 @@
             padding: 20px;
             height: fit-content;
         }
+
         .filter-group {
-            margin-bottom: 20px; /* Tạo khoảng cách giữa các nhóm filter */
+            margin-bottom: 20px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--cps-border);
         }
+
         .filter-group:last-child {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
         }
+
         .filter-group .form-label {
             font-weight: 600;
             margin-bottom: 10px;
         }
 
-        /* === CSS CHO THẺ SẢN PHẨM MỚI === */
         .product-card {
             background-color: #fff;
             border: 1px solid var(--cps-border);
@@ -69,24 +79,50 @@
             display: flex;
             flex-direction: column;
         }
+
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         .card-img-container {
-            position: relative; /* Quan trọng để định vị nút "Thêm giỏ hàng" */
+            position: relative;
             padding: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 220px;
         }
-        .product-card-img { max-height: 100%; max-width: 100%; object-fit: contain; }
-        .discount-badge { position: absolute; top: 10px; left: 10px; background-color: var(--cps-red); color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-        .installment-badge { position: absolute; top: 10px; right: 10px; background-color: var(--cps-bg-light); color: var(--cps-text-light); padding: 4px 8px; border-radius: 6px; font-size: 12px; }
 
-        /* === NÚT THÊM GIỎ HÀNG MỚI === */
+        .product-card-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--cps-red);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .installment-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--cps-bg-light);
+            color: var(--cps-text-light);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
         .add-to-cart-btn {
             position: absolute;
             bottom: 10px;
@@ -106,30 +142,70 @@
             backdrop-filter: blur(2px);
             z-index: 2;
         }
+
         .add-to-cart-btn:hover {
             background-color: var(--cps-primary);
             color: #fff;
             transform: scale(1.1);
         }
 
-        .product-card .card-body { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-        .product-title-link { text-decoration: none; color: inherit; }
+        .product-card .card-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
         .product-title {
             font-size: 14px;
             font-weight: 600;
             color: var(--cps-text-dark);
             line-height: 1.4;
-            height: 39.2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            height: 39.2px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             margin-bottom: 10px;
         }
-        .price-sale { font-size: 18px; font-weight: bold; color: var(--cps-red); }
-        .price-original { font-size: 13px; color: var(--cps-text-light); text-decoration: line-through; margin-left: 8px; }
-        .promo-info { background-color: var(--cps-bg-light); border: 1px solid var(--cps-border); border-radius: 8px; padding: 8px; font-size: 12px; color: var(--cps-text-dark); margin-top: 10px; }
-        .card-footer-actions { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--cps-border); display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .rating { color: var(--cps-text-dark); }
-        .rating .fa-star { color: var(--cps-star-yellow); }
-        .wishlist { color: var(--cps-red); font-weight: 500; }
-        .wishlist .fa-heart { margin-right: 4px; }
+
+        .price-sale {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--cps-red);
+        }
+
+        .price-original {
+            font-size: 13px;
+            color: var(--cps-text-light);
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+
+        .promo-info {
+            background-color: var(--cps-bg-light);
+            border: 1px solid var(--cps-border);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            color: var(--cps-text-dark);
+            margin-top: 10px;
+        }
+
+        /* === CSS CHO KHỐI NÚT HÀNH ĐỘNG MỚI === */
+        .card-action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Chia làm 2 cột bằng nhau */
+            gap: 8px; /* Khoảng cách giữa 2 nút */
+            margin-top: auto; /* Đẩy khối nút xuống dưới cùng của card-body */
+            padding-top: 15px;
+        }
+
     </style>
 </head>
 <body>
@@ -140,18 +216,24 @@
     <div class="row">
         <!-- Sidebar -->
         <aside class="col-lg-3 d-none d-lg-block">
+            <%-- Giữ nguyên sidebar --%>
             <div class="sidebar">
                 <h4 class="mb-3"><i class="fas fa-filter me-2"></i>Bộ lọc</h4>
                 <form action="search" method="get">
                     <div class="filter-group">
                         <label for="searchName" class="form-label">Tên sản phẩm</label>
-                        <input type="text" class="form-control" id="searchName" name="keyword" placeholder="Nhập tên..." value="${keyword}">
+                        <input type="text" class="form-control" id="searchName" name="keyword" placeholder="Nhập tên..."
+                               value="${keyword}">
                     </div>
                     <div class="filter-group">
                         <label class="form-label">Danh mục</label>
                         <c:forEach var="category" items="${categories}">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="${category.settingId}" id="cat-${category.settingId}" name="category" <c:forEach var="id" items="${selectedCategories}"><c:if test="${id == category.settingId}">checked</c:if></c:forEach>>
+                                <input class="form-check-input" type="checkbox" value="${category.settingId}"
+                                       id="cat-${category.settingId}" name="category"
+                                       <c:forEach var="id" items="${selectedCategories}">
+                                       <c:if test="${id == category.settingId}">checked</c:if>
+                                </c:forEach>>
                                 <label class="form-check-label" for="cat-${category.settingId}">${category.name}</label>
                             </div>
                         </c:forEach>
@@ -159,8 +241,10 @@
                     <div class="filter-group">
                         <label class="form-label">Khoảng giá</label>
                         <div class="row g-2">
-                            <div class="col-6"><input type="number" class="form-control" name="minPrice" placeholder="Từ" value="${minPrice}"></div>
-                            <div class="col-6"><input type="number" class="form-control" name="maxPrice" placeholder="Đến" value="${maxPrice}"></div>
+                            <div class="col-6"><input type="number" class="form-control" name="minPrice"
+                                                      placeholder="Từ" value="${minPrice}"></div>
+                            <div class="col-6"><input type="number" class="form-control" name="maxPrice"
+                                                      placeholder="Đến" value="${maxPrice}"></div>
                         </div>
                     </div>
                     <div class="filter-group">
@@ -173,7 +257,8 @@
                             <option value="price-desc">Giá cao đến thấp</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary w-100" type="submit"><i class="fas fa-check me-2"></i>Áp dụng</button>
+                    <button class="btn btn-primary w-100" type="submit"><i class="fas fa-check me-2"></i>Áp dụng
+                    </button>
                 </form>
             </div>
         </aside>
@@ -185,82 +270,97 @@
                 <c:forEach var="product" items="${pageResult.content}">
                     <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6">
                         <div class="product-card">
+                                <%-- Bỏ nút "add-to-cart-btn" ra khỏi đây --%>
                             <div class="card-img-container">
                                 <c:if test="${product.priceOrigin > product.priceSale}">
-                                    <c:set var="discountPercent" value="${(1 - (product.priceSale / product.priceOrigin)) * 100}" />
-                                    <div class="discount-badge">Giảm <fmt:formatNumber value="${discountPercent}" maxFractionDigits="0"/>%</div>
+                                    <c:set var="discountPercent"
+                                           value="${(1 - (product.priceSale / product.priceOrigin)) * 100}"/>
+                                    <div class="discount-badge">Giảm <fmt:formatNumber value="${discountPercent}"
+                                                                                       maxFractionDigits="0"/>%
+                                    </div>
                                 </c:if>
                                 <div class="installment-badge">Trả góp 0%</div>
-                                <a href="product-detail?id=${product.id}"><img src="${product.imageUrl}.jpg" alt="${product.name}" class="product-card-img"></a>
-                                <form action="${pageContext.request.contextPath}/add-to-cart" method="get" style="display: inline;">
-                                    <input type="hidden" name="productId" value="${product.id}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="price" value="${product.priceSale}">
-                                    <button type="submit" class="add-to-cart-btn" title="Thêm vào giỏ hàng"><i class="fas fa-cart-plus"></i></button>
-                                </form>
+                                <a href="product-detail?id=${product.id}"><img src="${product.imageUrl}.jpg"
+                                                                               alt="${product.name}"
+                                                                               class="product-card-img"></a>
                             </div>
                             <div class="card-body">
-                                <a href="product-detail?id=${product.id}" class="product-title-link"><h3 class="product-title">${product.name}</h3></a>
+                                <a href="product-detail?id=${product.id}" class="product-title-link"><h3
+                                        class="product-title">${product.name}</h3></a>
                                 <div class="price-block">
-                                    <span class="price-sale"><fmt:formatNumber value="${product.priceSale}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ</span>
-                                    <c:if test="${product.priceOrigin > product.priceSale}"><span class="price-original"><fmt:formatNumber value="${product.priceOrigin}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ</span></c:if>
+                                    <span class="price-sale"><fmt:formatNumber value="${product.priceSale}"
+                                                                               type="currency" currencySymbol=""
+                                                                               maxFractionDigits="0"/>đ</span>
+                                    <c:if test="${product.priceOrigin > product.priceSale}"><span
+                                            class="price-original"><fmt:formatNumber value="${product.priceOrigin}"
+                                                                                     type="currency" currencySymbol=""
+                                                                                     maxFractionDigits="0"/>đ</span></c:if>
                                 </div>
                                 <div class="promo-info">Không phí chuyển đổi khi trả góp 0%...</div>
-                                <div class="card-footer-actions">
-                                    <div class="rating"><i class="fas fa-star"></i> 4.9</div>
-                                    <div class="wishlist"><i class="far fa-heart"></i> Yêu thích</div>
+
+                                <!-- ======================= KHỐI NÚT HÀNH ĐỘNG MỚI ======================= -->
+                                <div class="card-action-buttons">
+                                    <!-- Nút Thêm vào giỏ hàng -->
+                                    <form action="${pageContext.request.contextPath}/add-to-cart" method="get">
+                                        <input type="hidden" name="productId" value="${product.id}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="price" value="${product.priceSale}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                                            <i class="fas fa-cart-plus"></i>
+                                        </button>
+                                    </form>
+                                    <!-- Nút Mua ngay -->
+                                    <form action="${pageContext.request.contextPath}/buy-now" method="get">
+                                        <input type="hidden" name="productId" value="${product.id}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="price" value="${product.priceSale}">
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            Mua ngay
+                                        </button>
+                                    </form>
                                 </div>
+                                <!-- ======================================================================= -->
                             </div>
                         </div>
                     </div>
                 </c:forEach>
             </div>
-
-            <!-- ======================= KHỐI PHÂN TRANG ĐÃ ĐƯỢC NÂNG CẤP ======================= -->
-            <!-- Bước 1: Xây dựng URL cơ sở DỰA TRÊN LOẠI TRANG -->
-            <c:choose>
-                <%-- Nếu đây là trang chủ (do HomeServlet đặt pageType='home') --%>
-                <c:when test="${pageType == 'home'}">
-                    <c:set var="baseUrl" value="${pageContext.request.contextPath}/home?"/>
-                </c:when>
-                <%-- Ngược lại, đây là trang tìm kiếm (do SearchServlet không đặt pageType) --%>
-                <c:otherwise>
-                    <c:set var="baseUrl" value="${pageContext.request.contextPath}/search?keyword=${keyword}"/>
-                    <c:forEach var="cat" items="${selectedCategories}"><c:set var="baseUrl"
-                                                                              value="${baseUrl}&category=${cat}"/></c:forEach>
-                    <c:if test="${not empty minPrice}"><c:set var="baseUrl" value="${baseUrl}&minPrice=${minPrice}"/></c:if>
-                    <c:if test="${not empty maxPrice}"><c:set var="baseUrl" value="${baseUrl}&maxPrice=${maxPrice}"/></c:if>
-                    <c:if test="${not empty sortBy}"><c:set var="baseUrl" value="${baseUrl}&sortBy=${sortBy}"/></c:if>
-                </c:otherwise>
-            </c:choose>
-
-            <!-- Bước 2: Hiển thị các nút phân trang nếu có nhiều hơn 1 trang -->
+            <%-- Khối phân trang giữ nguyên --%>
             <c:if test="${pageResult.totalPages > 1}">
-                <nav aria-label="Page navigation">
+                <c:set var="baseUrl" value="${pageContext.request.contextPath}/search?keyword=${keyword}"/>
+                <c:choose>
+                    <c:when test="${pageType == 'home'}"><c:set var="baseUrl"
+                                                                value="${pageContext.request.contextPath}/home?"/></c:when>
+                    <c:otherwise>
+                        <c:set var="baseUrl" value="${pageContext.request.contextPath}/search?keyword=${keyword}"/>
+                        <c:forEach var="cat" items="${selectedCategories}"><c:set var="baseUrl"
+                                                                                  value="${baseUrl}&category=${cat}"/></c:forEach>
+                        <c:if test="${not empty minPrice}"><c:set var="baseUrl"
+                                                                  value="${baseUrl}&minPrice=${minPrice}"/></c:if>
+                        <c:if test="${not empty maxPrice}"><c:set var="baseUrl"
+                                                                  value="${baseUrl}&maxPrice=${maxPrice}"/></c:if>
+                        <c:if test="${not empty sortBy}"><c:set var="baseUrl"
+                                                                value="${baseUrl}&sortBy=${sortBy}"/></c:if>
+                    </c:otherwise>
+                </c:choose>
+                <nav>
                     <ul class="pagination justify-content-center mt-5">
-                        <!-- Nút Previous -->
-                        <li class="page-item ${pageResult.currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage - 1}" aria-label="Previous">
-                                <span aria-hidden="true">«</span>
-                            </a>
+                        <li class="page-item ${pageResult.currentPage == 1 ? 'disabled' : ''}"><a class="page-link"
+                                                                                                  href="${baseUrl}&page=${pageResult.currentPage - 1}">«</a>
                         </li>
-                        <!-- Các nút số trang -->
                         <c:forEach var="i" begin="1" end="${pageResult.totalPages}">
-                            <li class="page-item ${pageResult.currentPage == i ? 'active' : ''}">
-                                <a class="page-link" href="${baseUrl}&page=${i}">${i}</a>
+                            <li class="page-item ${pageResult.currentPage == i ? 'active' : ''}"><a class="page-link"
+                                                                                                    href="${baseUrl}&page=${i}">${i}</a>
                             </li>
                         </c:forEach>
-                        <!-- Nút Next -->
-                        <li class="page-item ${pageResult.currentPage == pageResult.totalPages ? 'disabled' : ''}">
-                            <a class="page-link" href="${baseUrl}&page=${pageResult.currentPage + 1}" aria-label="Next">
-                                <span aria-hidden="true">»</span>
-                            </a>
-                        </li>
+                        <li class="page-item ${pageResult.currentPage == pageResult.totalPages ? 'disabled' : ''}"><a
+                                class="page-link" href="${baseUrl}&page=${pageResult.currentPage + 1}">»</a></li>
                     </ul>
                 </nav>
             </c:if>
         </main>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function showToast(message) {

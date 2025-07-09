@@ -8,6 +8,7 @@ import model.dto.CartItemDTO;
 import model.entity.Cart;
 import model.entity.CartItem;
 import model.entity.Product;
+import model.entity.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -111,5 +112,57 @@ public class CartService {
     public void deleteCart(int cartId) {
         cartItemDAO.deleteByCartId(cartId);
         cartDAO.deleteCartById(cartId);
+    }
+
+
+    // ====================================================================================
+// === HÃY THÊM PHƯƠNG THỨC MỚI NÀY VÀO TRONG FILE CartService.java CỦA BẠN ===
+// ====================================================================================
+
+    /**
+     * Phương thức cấp cao để thêm sản phẩm vào giỏ hàng.
+     * Tự động xử lý việc tìm hoặc tạo giỏ hàng mới.
+     *
+     * @param user             Đối tượng User nếu đã đăng nhập (có thể là null)
+     * @param cartIdFromSession ID của giỏ hàng từ session (có thể là null)
+     * @param productId        ID của sản phẩm cần thêm
+     * @param quantity         Số lượng cần thêm
+     * @return CartDTO đã được cập nhật
+     */
+    public CartDTO addToCart(User user, Integer cartIdFromSession, int productId, int quantity) {
+        // 1. Xác định userId
+        Integer userId = (user != null) ? user.getUserId() : null;
+
+        // 2. Tìm hoặc Tạo Giỏ hàng
+        Cart cart = null;
+        // Ưu tiên tìm giỏ hàng theo user ID nếu đã đăng nhập
+        if (userId != null) {
+            cart = cartDAO.findByUserId(userId);
+        }
+        // Nếu không có hoặc là khách, tìm theo cartId trong session
+        if (cart == null && cartIdFromSession != null) {
+            cart = cartDAO.findById(cartIdFromSession);
+        }
+        // Nếu vẫn không có, tạo một giỏ hàng mới
+        if (cart == null) {
+            int newCartId = cartDAO.createCart(userId);
+            cart = cartDAO.findById(newCartId);
+        }
+
+        // Nếu sau tất cả các bước vẫn không có giỏ hàng, đây là lỗi nghiêm trọng
+        if (cart == null) {
+            throw new RuntimeException("Không thể tìm hoặc tạo giỏ hàng.");
+        }
+
+        // 3. Lấy giá sản phẩm từ database để đảm bảo an toàn
+        Product product = productDAO.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với ID: " + productId));
+
+        // 4. Thêm sản phẩm vào giỏ hàng (sử dụng phương thức cấp thấp đã có)
+        // Lưu ý: phương thức addProductToCart của bạn cần giá kiểu long
+        cartDAO.addProductToCart(cart.getCartId(), productId, quantity, (long) product.getPriceSale());
+
+        // 5. Trả về CartDTO đã được làm mới để servlet cập nhật session
+        return getCartByUserIdOrCartId(userId, cart.getCartId());
     }
 }
