@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.dao.impl.OrderDAOImpl;
 import model.entity.*;
+import service.EmailService;
 import service.LocationService;
+import service.impl.EmailServiceImpl;
 import service.impl.LocationServiceImpl;
 
 import java.io.IOException;
@@ -93,17 +95,36 @@ public class OrderServlet extends HttpServlet {
 
             int orderId = Integer.parseInt(orderIdParam);
 
-            // Kiểm tra xem đơn hàng có thể hủy được không
+            // Get order details before cancellation
+            Order order = orderDAO.getOrderById(orderId);
+            if (order == null) {
+                sendJsonResponse(resp, false, "Đơn hàng không tồn tại");
+                return;
+            }
+
+            // Get order items for email
+            List<OrderItem> orderItems = orderDAO.getOrderItemsByOrderId(orderId);
+            order.setOrderItems(orderItems);
+
+            // Check if order can be cancelled
             if (!orderDAO.canCancelOrder(orderId)) {
                 sendJsonResponse(resp, false, "Đơn hàng này không thể hủy được. Chỉ có thể hủy đơn hàng đang chờ xử lý hoặc đang xử lý.");
                 return;
             }
 
-            // Thực hiện hủy đơn hàng
+            // Cancel the order
             boolean success = orderDAO.cancelOrder(orderId);
 
             if (success) {
-                sendJsonResponse(resp, true, "Đơn hàng đã được hủy thành công!");
+                // Send cancellation email
+                EmailService emailService = new EmailServiceImpl();
+                boolean emailSent = emailService.sendOrderCancellationEmail(order);
+
+                if (emailSent) {
+                    sendJsonResponse(resp, true, "Đơn hàng đã được hủy thành công! Email thông báo đã được gửi.");
+                } else {
+                    sendJsonResponse(resp, true, "Đơn hàng đã được hủy thành công! Tuy nhiên, không thể gửi email thông báo.");
+                }
             } else {
                 sendJsonResponse(resp, false, "Không thể hủy đơn hàng. Vui lòng thử lại sau.");
             }
@@ -283,6 +304,16 @@ public class OrderServlet extends HttpServlet {
                 return;
             }
 
+            // Get current order details before update
+            Order currentOrder = orderDAO.getOrderById(Integer.parseInt(orderId));
+            if (currentOrder == null) {
+                req.setAttribute("errorMessage", "Không tìm thấy đơn hàng");
+                changeOrderAddress(req, resp);
+                return;
+            }
+
+            String oldAddress = currentOrder.getAddress();
+
             // Combine full address
             String fullAddress = shippingAddress + ", " + shippingWard + ", " + shippingDistrict + ", " + shippingCity;
 
@@ -304,8 +335,20 @@ public class OrderServlet extends HttpServlet {
             );
 
             if (updated) {
-                // Redirect to order detail page with success message
-                resp.sendRedirect(req.getContextPath() + "/orders/" + orderId + "?updateSuccess=true");
+                // Get updated order details
+                Order updatedOrder = orderDAO.getOrderById(Integer.parseInt(orderId));
+
+                // Send address change email
+                EmailService emailService = new EmailServiceImpl();
+                boolean emailSent = emailService.sendAddressChangeEmail(updatedOrder, oldAddress, fullAddress);
+
+                if (emailSent) {
+                    // Redirect to order detail page with success message
+                    resp.sendRedirect(req.getContextPath() + "/orders/" + orderId + "?updateSuccess=true&emailSent=true");
+                } else {
+                    // Still successful but email failed
+                    resp.sendRedirect(req.getContextPath() + "/orders/" + orderId + "?updateSuccess=true&emailSent=false");
+                }
             } else {
                 req.setAttribute("errorMessage", "Không thể cập nhật địa chỉ. Vui lòng thử lại");
                 changeOrderAddress(req, resp);
@@ -315,7 +358,7 @@ public class OrderServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/orders");
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật địa chỉ");
+            req.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật địa chỉ: " + e.getMessage());
             changeOrderAddress(req, resp);
         }
     }
