@@ -6,8 +6,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.dao.impl.OrderDAOImpl;
-import model.entity.Order;
-import model.entity.OrderItem;
+import model.entity.*;
+import service.LocationService;
+import service.impl.LocationServiceImpl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,6 +39,8 @@ public class OrderServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 System.out.println("Fetching all orders");
                 showAllOrders(req, resp);
+            } else if (pathInfo == null || pathInfo.equals("/change-address")) {
+                changeOrderAddress( req, resp);
             } else {
                 // Handle specific order details by ID in URL path
                 String[] pathParts = pathInfo.split("/");
@@ -67,7 +70,9 @@ public class OrderServlet extends HttpServlet {
         System.out.println("OrderServlet - doPost called with path: " + pathInfo + ", action: " + action);
 
         try {
-            if ("cancel".equals(action)) {
+            if (pathInfo != null && pathInfo.equals("/change-address")) {
+                handleUpdateAddress(req, resp);
+            } else if ("cancel".equals(action)) {
                 handleCancelOrder(req, resp);
             } else {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
@@ -194,5 +199,132 @@ public class OrderServlet extends HttpServlet {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error loading order details: " + e.getMessage());
         }
+    }
+
+    private void changeOrderAddress(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String orderId = req.getParameter("orderId");
+        OrderDAOImpl orderDAO = new OrderDAOImpl();
+        LocationService locationService = new LocationServiceImpl();
+
+        if (orderId == null || orderId.trim().isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/orders");
+            return;
+        }
+
+        try {
+            // Get order details from database
+            Order order = orderDAO.getOrderById(Integer.parseInt(orderId));
+
+            if (order == null) {
+                resp.sendRedirect(req.getContextPath() + "/orders");
+                return;
+            }
+
+            // Check if order can be modified (only pending or processing orders)
+            if (!orderDAO.canModifyOrder(Integer.parseInt(orderId))) {
+                req.setAttribute("error", "Không thể thay đổi địa chỉ cho đơn hàng này. Chỉ có thể thay đổi đơn hàng đang chờ xử lý hoặc đang xử lý.");
+                req.setAttribute("order", order);
+                req.getRequestDispatcher("/change-address.jsp").forward(req, resp);
+                return;
+            }
+
+            // Load provinces for dropdown (you'll need to implement this)
+            List<Province> provinces = locationService.getAllProvinces();
+            List<District> districts = locationService.getAllDistricts();
+            List<Ward> wards = locationService.getAllWards();
+            req.setAttribute("provinces", provinces);
+            req.setAttribute("districts", districts);
+            req.setAttribute("wards", wards);
+
+            // Set order data for the form
+            req.setAttribute("order", order);
+
+            req.getRequestDispatcher("/change-address.jsp").forward(req, resp);
+
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/orders");
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect(req.getContextPath() + "/orders");
+        }
+    }
+
+    private void handleUpdateAddress(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            String orderId = req.getParameter("orderId");
+            String recipientName = req.getParameter("recipientName");
+            String recipientPhone = req.getParameter("recipientPhone");
+            String recipientEmail = req.getParameter("recipientEmail");
+            String shippingAddress = req.getParameter("shippingAddress");
+            String shippingCity = req.getParameter("shippingCity");
+            String shippingDistrict = req.getParameter("shippingDistrict");
+            String shippingWard = req.getParameter("shippingWard");
+            String note = req.getParameter("note");
+
+            // Validate required fields
+            if (orderId == null || recipientName == null || recipientPhone == null ||
+                    recipientEmail == null || shippingAddress == null || shippingCity == null ||
+                    shippingDistrict == null || shippingWard == null) {
+                req.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin bắt buộc");
+                changeOrderAddress(req, resp);
+                return;
+            }
+
+            // Validate input format
+            if (!isValidPhone(recipientPhone)) {
+                req.setAttribute("errorMessage", "Số điện thoại không hợp lệ");
+                changeOrderAddress(req, resp);
+                return;
+            }
+
+            if (!isValidEmail(recipientEmail)) {
+                req.setAttribute("errorMessage", "Email không hợp lệ");
+                changeOrderAddress(req, resp);
+                return;
+            }
+
+            // Combine full address
+            String fullAddress = shippingAddress + ", " + shippingWard + ", " + shippingDistrict + ", " + shippingCity;
+
+            // Check if order can be modified
+            if (!orderDAO.canModifyOrder(Integer.parseInt(orderId))) {
+                req.setAttribute("errorMessage", "Không thể thay đổi địa chỉ cho đơn hàng này");
+                changeOrderAddress(req, resp);
+                return;
+            }
+
+            // Update order address in database
+            boolean updated = orderDAO.updateOrderAddress(
+                    Integer.parseInt(orderId),
+                    recipientName,
+                    recipientPhone,
+                    recipientEmail,
+                    fullAddress,
+                    note
+            );
+
+            if (updated) {
+                // Redirect to order detail page with success message
+                resp.sendRedirect(req.getContextPath() + "/orders/" + orderId + "?updateSuccess=true");
+            } else {
+                req.setAttribute("errorMessage", "Không thể cập nhật địa chỉ. Vui lòng thử lại");
+                changeOrderAddress(req, resp);
+            }
+
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/orders");
+        } catch (Exception e) {
+            e.printStackTrace();
+            req.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật địa chỉ");
+            changeOrderAddress(req, resp);
+        }
+    }
+
+    private boolean isValidPhone(String phone) {
+        return phone != null && phone.matches("^0\\d{9}$");
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     }
 }

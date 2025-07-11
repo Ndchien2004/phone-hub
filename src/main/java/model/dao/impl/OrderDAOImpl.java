@@ -292,4 +292,57 @@ public class OrderDAOImpl implements OrderDAO {
 
         return order;
     }
+
+    public boolean canModifyOrder(int orderId) {
+        // Check if order status allows modification (only pending or processing)
+        String status = getOrderStatus(orderId);
+        return "Pending".equals(status) || "Processing".equals(status);
+    }
+
+    public String getOrderStatus(int orderId) {
+        String sql = """
+        SELECT s.name 
+        FROM orders o 
+        JOIN settings s ON o.status_id = s.setting_id 
+        WHERE o.order_id = ? AND o.is_deleted = 0
+        """;
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, orderId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null; // Return null if order not found or error occurred
+    }
+
+    public boolean updateOrderAddress(int orderId, String fullName, String phone, String email, String address, String note) {
+        String sql = "UPDATE orders SET full_name = ?, phone_number = ?, email = ?, address = ?, note = ? WHERE order_id = ?";
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, fullName);
+            stmt.setString(2, phone);
+            stmt.setString(3, email);
+            stmt.setString(4, address);
+            stmt.setString(5, note);
+            stmt.setInt(6, orderId);
+
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

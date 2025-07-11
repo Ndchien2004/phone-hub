@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -343,6 +343,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            justify-content: space-around;
         }
 
         .btn {
@@ -612,6 +613,8 @@
 </head>
 <body>
 
+<%@ include file="../layout/navbar.jsp" %>
+
 <div class="container">
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
@@ -864,9 +867,11 @@
                 </c:if>
 
                 <!-- Nút thay đổi địa chỉ - chỉ hiển thị khi đơn hàng ở trạng thái chờ xử lý hoặc đang xử lý -->
-                <button id="changeAddressBtn" class="btn btn-outline">
-                    <i class="fas fa-map-marker-alt"></i> Thay đổi địa chỉ
-                </button>
+                <c:if test="${not empty order.status and (fn:containsIgnoreCase(order.status.name, 'Pending') or fn:containsIgnoreCase(order.status.description, 'chờ') or fn:containsIgnoreCase(order.status.name, 'Processing') or fn:containsIgnoreCase(order.status.description, 'xử lý'))}">
+                    <a href="${pageContext.request.contextPath}/orders/change-address?orderId=${order.orderId}" id="changeAddressBtn" class="btn btn-outline">
+                        <i class="fas fa-map-marker-alt"></i> Thay đổi địa chỉ
+                    </a>
+                </c:if>
             </div>
         </div>
     </div>
@@ -913,18 +918,63 @@
 
 
 <script>
+    // Global toast functions
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+
+        toastMessage.textContent = message;
+
+        if (isError) {
+            toast.classList.add('error');
+            toastIcon.className = 'toast-icon fas fa-exclamation-circle';
+        } else {
+            toast.classList.remove('error');
+            toastIcon.className = 'toast-icon fas fa-check-circle';
+        }
+
+        toast.style.display = 'block';
+
+        setTimeout(() => {
+            hideToast();
+        }, 5000);
+    }
+
+    function hideToast() {
+        const toast = document.getElementById('toast');
+        toast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            toast.style.display = 'none';
+            toast.style.animation = 'slideInRight 0.3s ease';
+        }, 300);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for update success parameter and show toast
+        const urlParams = new URLSearchParams(window.location.search);
+        const updateSuccess = urlParams.get('updateSuccess');
+
+        if (updateSuccess === 'true') {
+            showToast('Địa chỉ giao hàng đã được cập nhật thành công!', false);
+
+            // Remove the parameter from URL to clean up
+            const url = new URL(window.location);
+            url.searchParams.delete('updateSuccess');
+            window.history.replaceState({}, document.title, url.toString());
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         // Add hover effects to product items
         const productItems = document.querySelectorAll('.product-item');
         productItems.forEach(item => {
             item.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-3px)';
-                this.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)';
+                this.style.transform = 'translateY(-2px)';
             });
 
             item.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                this.style.transform = 'translateY(0)';
             });
         });
 
@@ -944,9 +994,6 @@
         const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
         const cancelCancelBtn = document.getElementById('cancelCancelBtn');
         const closeModal = document.querySelector('.close');
-        const toast = document.getElementById('toast');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastMessage = document.getElementById('toastMessage');
         const toastClose = document.querySelector('.toast-close');
 
         // Show modal
@@ -971,78 +1018,53 @@
             }
         });
 
-        // Show toast
-        function showToast(message, isError = false) {
-            toastMessage.textContent = message;
-
-            if (isError) {
-                toast.classList.add('error');
-                toastIcon.className = 'toast-icon fas fa-exclamation-circle';
-            } else {
-                toast.classList.remove('error');
-                toastIcon.className = 'toast-icon fas fa-check-circle';
-            }
-
-            toast.style.display = 'block';
-
-            setTimeout(() => {
-                hideToast();
-            }, 5000);
+        if (toastClose) {
+            toastClose.addEventListener('click', hideToast);
         }
-
-        // Hide toast
-        function hideToast() {
-            toast.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => {
-                toast.style.display = 'none';
-                toast.style.animation = 'slideInRight 0.3s ease';
-            }, 300);
-        }
-
-        toastClose.addEventListener('click', hideToast);
 
         // Handle cancel order
-        cancelConfirmBtn.addEventListener('click', function() {
-            const originalText = this.innerHTML;
+        if (cancelConfirmBtn) {
+            cancelConfirmBtn.addEventListener('click', function() {
+                const originalText = this.innerHTML;
 
-            // Show loading state
-            this.innerHTML = '<div class="spinner"></div>Đang hủy...';
-            this.disabled = true;
+                // Show loading state
+                this.innerHTML = '<div class="spinner"></div>Đang hủy...';
+                this.disabled = true;
 
-            // Send cancel request
-            fetch('${pageContext.request.contextPath}/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'action=cancel&orderId=${order.orderId}'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, false);
-                        hideModal();
-
-                        // Reload page after a short delay to show updated status
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    } else {
-                        showToast(data.message, true);
-                    }
+                // Send cancel request
+                fetch('${pageContext.request.contextPath}/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=cancel&orderId=${order.orderId}'
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại.', true);
-                })
-                .finally(() => {
-                    // Restore button state
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                });
-        });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, false);
+                            hideModal();
+
+                            // Reload page after a short delay to show updated status
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            showToast(data.message, true);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại.', true);
+                    })
+                    .finally(() => {
+                        // Restore button state
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    });
+            });
+        }
     });
-
 </script>
 
 </body>
