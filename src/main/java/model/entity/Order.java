@@ -26,7 +26,7 @@ public class Order {
     private Integer discount;
     private boolean isDeleted;
     private String transactionCode;
-
+    private String assignedSalesId;
 
     public Integer getOrderId() {
         return orderId;
@@ -155,6 +155,10 @@ public class Order {
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
     }
+
+    public String getAssignedSalesId() { return assignedSalesId; }
+
+    public void setAssignedSalesId(String assignedSalesId) { this.assignedSalesId = assignedSalesId; }
 
     public String getFormattedOrderDate() {
         if (orderDate != null) {
